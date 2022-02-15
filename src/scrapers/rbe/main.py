@@ -4,51 +4,65 @@ import time
 from selenium.webdriver.common.keys import Keys
 
 
-from src.scrapers.main import connection
+from src.scrapers.main import scraper
 from src.utils.set_logger import main as set_logger
 
 
 logger = set_logger()
 
 
-
-
-class rbe(connection):
+class Rbe(scraper):
     def __init__(self,  **kwargs):
         print("---running in rbe mode---")
         self.type = 'rbe'
-        connection.__init__(self, type_='rbe', **kwargs)
+        if 'Mongo' in kwargs.keys():
+            scraper.__init__(self, type_='rbe', mongo=kwargs['Mongo'])
+        else:
+            scraper.__init__(self, type_='rbe')
+            print(f'info rbe scrper init: no Mongo set')
+            logger.info(f'info rbe scrper init: no Mongo set')
+
 
     def scrap_rcs(self):
         self.check_search_page()
+        self.info = ''
         if self.status:
             if isinstance(self.rcs, str):
                 self.search_rcs()
                 if self.status:
                     trial = 0
-                    time.sleep(0.5)
+                    time.sleep(1)
                     while trial < 10:
+                        print(f"    rcs: {self.rcs}")
+                        print(f"    trial: {trial}")
                         test_err = self.check_page("Les erreurs suivantes ont été détectées", 'b')
-                        test_err2 = self.check_page("Liste des entités immatriculées au RCS répondant aux critères", 'span')
+                        print(f"    test_err {test_err}")
+                        test_err2 = self.check_page("élément(s) trouvé(s)", 'span' )#Liste des entités immatriculées au RCS répondant aux critères", 'span')
+                        print(f"    test_err2 {test_err2}")
                         test_rcs = self.check_page(self.rcs, 'h1')
+                        print(f"    test_rcs {test_rcs}")
                         testvalid1 = self.check_page("Bénéficiaires effectifs", 'h1')
+                        print(f"    testvalid1 {testvalid1}")
                         testvalid2 = self.check_page("Date de la dernière déclaration", 'h2')
-                        print(f"trial at scrap_rcs: {trial}")
+                        print(f"    testvalid2 {testvalid2}")
+                        test_page_changed_RCS = testvalid1 or testvalid2
+                        print(f"    trial at scrap_rcs: {trial}")
                         if test_err:
                             # RCS number des not exist (red banner)
-                            print("RCS doesn't exist")
+                            print(f"RBE {self.rcs} doesn't exist")
                             self.status = True
+                            self.extract_page()
                             self.record_empty_RCS()
                             trial = 10
                         elif test_err2:
-                            print("not_registrated_BO")
-                            self.record_empty_RCS()
-                            self.dict_page['status'] = 'not_registrated_BO'
+                            print(f"RBE {self.rcs} not_registrated_BO")
+                            self.extract_page()
+                            self.record_notregist_BO()
                             self.status = True
                             trial = 10
                         elif test_rcs:
                             # RCS number exist --> scrap page
-                            print("RCS does exist")
+                            print(f"RBE {self.rcs} does exist")
                             self.extract_page()
                             self.record_RCS_content()
                             self.status = True
@@ -58,26 +72,21 @@ class rbe(connection):
                             trial = 10
                         else:
                             trial += 1
-                            time.sleep(trial * 0.5)
+                            time.sleep(trial*0.5)
                             self.status = False
                             print(f'error after search rcs: {self.rcs} at check page results')
                             logger.debug(f'error after search rcs: {self.rcs} at check page results')
-                            test_page_changed_RCS = testvalid1 or testvalid2
-                            if test_page_changed_RCS:
-                                # RCS number des not exist (red banner)
-                                print("RCS changed")
-                                self.status = True
-                                self.info = ''
-                                self.record_changed_RCS()
-                                print(f'{self.rcs} probably changed RCS number')
-                                logger.debug(f'{self.rcs} probably changed RCS number')
-                                back = self.driver.find_element_by_link_text('Recherche')
-                                back.click()
-                                self.status = True
-                                trial = 10
-                            else:
-                                trial += 1
-                                time.sleep(trial * 0.5)
+                    print(f'out of while of {self.rcs}: trial = {trial}, self.status = {self.status}')
+                    if test_page_changed_RCS and not self.status:
+                        # RCS number des not exist (red banner)
+                        self.status = True
+                        self.extract_page()
+                        self.record_changed_RCS()
+                        print(f'{self.rcs} probably changed RCS number')
+                        logger.debug(f'{self.rcs} probably changed RCS number')
+                        back = self.driver.find_element_by_link_text('Recherche')
+                        back.click()
+                        self.status = True
                 else:
                     print('error at rcs.scrap_rcs: status=False after search')
                     logger.error('error at rcs.scrap_rcs: status=False after search')

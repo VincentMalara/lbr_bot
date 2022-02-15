@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 import random
 import time
 import sys
@@ -12,7 +12,8 @@ from selenium.webdriver.firefox.options import Options
 from configs import settings
 from src.utils.set_logger import main as set_logger
 from src.scrapers.utils import check_page, answer_question, get_numbers
-
+from src.utils.handle_RCS_list import HandleRcsList
+from src.utils.task_index import main as task_index
 
 logger = set_logger()
 
@@ -22,16 +23,17 @@ URL_RCS = settings.URL_RCS
 URL_RESA = settings.URL_RESA
 
 BASE_DICT = {
-    'extraction_date': date.today().strftime("%d/%m/%Y"),
+    'extraction_date': datetime.today().strftime("%d/%m/%Y"),
     'RCS': '',
     'status': '',
     'info': '',
-    'scrapper_version': settings.scraper_version
+    'scraper_version': settings.scraper_version,
+    'scraping_index': ''
 }
 
 
-class connection():
-    def __init__(self, type_='rcs', headless=False):
+class scraper():
+    def __init__(self, type_='rcs', headless=False, mongo=None):
         self.headless = headless
         self.type = type_
         self.status = True
@@ -39,6 +41,9 @@ class connection():
         self.rcs = ''
         self.info = ''
         self.dict_page = []
+        self.Nlimit = 10
+        if mongo is not None:
+            self.Mongo = mongo
         if self.type == 'rbe':
             self.url = URL_RBE
         elif self.type == 'rcs':
@@ -49,6 +54,7 @@ class connection():
             self.status = False
             print(f"type {self.type} is not known")
             logger.info(f"type {self.type} is not known")
+        self.task_index = int(task_index(task='scraper', lbrtype=self.type)) + 1 #increment task index to track company scraped together
         self.RUA = ''
         self.options = Options()
         self.useragent = UserAgent()
@@ -242,7 +248,6 @@ class connection():
             logger.debug(f"get_main_page not valid for {self.type} type")
             print(f"get_main_page not valid for {self.type} type")
 
-
     def check_connected(self):
         page_content = beautifulsoup.BeautifulSoup(self.driver.page_source, features="html.parser")
         found = page_content.find_all("a", {"class": "deconnected"})
@@ -299,59 +304,42 @@ class connection():
         return self.status
 
     def extract_page(self):
-        #print(' - extract_LBR_page()')
-        try:
-            page = beautifulsoup.BeautifulSoup(self.driver.page_source,  features="html.parser")
-            if self.type == 'rcs':
-                dict_info = {"id": "content"}
-                self.info = str(page.find('div', dict_info))
-                self.status = True
-            elif self.type == 'rbe':
-                dict_info = {"class": "withInfoOut"}
-                self.info = str(page.find_all('div', dict_info))
-                self.status = True
-            else:
-                print(f'error at extract_page: {self.type} not accepted')
-                logger.debug(f'error at extract_page: {self.type} not accepted')
-                self.status = False
-        except Exception as e:
-            print(f'error at extract_page: {self.rcs}, error : {e}')
-            logger.debug(f'error at extract_page: {self.rcs}, error : {e}')
+        print(' - extract_LBR_page()')
+        page = beautifulsoup.BeautifulSoup(self.driver.page_source,  features="html.parser")
+        if self.type == 'rcs':
+            dict_info = {"id": "content"}
+            self.info = str(page.find('div', dict_info))
+            self.status = True
+        elif self.type == 'rbe':
+            dict_info = {"class": "withInfoOut"}
+            self.info = str(page.find_all('div', dict_info))
+            self.status = True
+        else:
+            print(f'error at extract_page: {self.type} not accepted')
+            logger.debug(f'error at extract_page: {self.type} not accepted')
             self.status = False
+        #except Exception as e:
+         #   print(f'error at extract_page: {self.rcs}, error : {e}')
+          #  logger.debug(f'error at extract_page: {self.rcs}, error : {e}')
+           # self.status = False
 
     def scrap_list(self, rcs_list=None):
         status = False
         if rcs_list is None:
-            print('error at rcs.scrap_list : at least a RCS number is needed')
-            logger.error('error at rcs.scrap_list : at least a RCS number is needed')
+            print('error at rcs.scrap_list : rcs_list input is missing')
+            logger.error('error at rcs.scrap_list : rcs_list input is missing')
         else:
-            if isinstance(rcs_list, list):
-                print('list')
-                self.rcs_list = rcs_list
-                status = True
-            elif isinstance(rcs_list, str):
-                print('str')
-                self.rcs_list = [rcs_list]
-                status = True
-            elif isinstance(rcs_list, pd.DataFrame): # in case input RCS is a dataframe
-                print("mongo.findRCS in dataframe mode")
-                if rcs_list.shape[0]>0:
-                    if 'RCS' in rcs_list.columns:
-                        self.rcs_list = rcs_list['RCS'].to_list()
-                        status = True
-                    else:
-                        print('error at rcs.scrap_list : No RCS column in input DF')
-                        logger.error('error at rcs.scrap_list : No RCS column in input DF')
-                else:
-                    print('error at rcs.scrap_list : empty input DF')
-                    logger.error('error at rcs.scrap_list : empty input DF')
-            else:
-                print(f'error at rcs.scrap_list : not accepted format {type(rcs_list)} for input. str, list or DF only')
-                logger.error(f'error at rcs.scrap_list : not accepted format {type(rcs_list)} for input. str, list or DF only')
+            self.rcs_list, status, msg = HandleRcsList(rcs_list)
+
+        if not status:
+            print(msg)
+            logger.error(msg)
 
         if status:
             self.dict_page = []
+            N = 0
             for rcs in self.rcs_list:
+                N+=1
                 print(f"rcs: {rcs}")
                 self.rcs = rcs
                 trial = 0
@@ -373,24 +361,48 @@ class connection():
                     self.status = False
                     break
                     print('break done')
+                if N>self.Nlimit:
+                    N=0
+                    self.save()
+                    self.dict_page = []
+            if len(self.dict_page)>0:
+                print("last save")
+                self.save()
+                self.dict_page = []
+
 
     def check_search_page(self):
         if self.type == 'rcs':
             self.check_page("Recherche d'une entité (Société, commerçant, ASBL, ...)", "h1")
         elif self.type == 'rbe':
             self.check_page("Recherche d'une entité (Société, ASBL, ...)", "h1")
+        elif self.type == 'resa':
+            self.check_page("Journal des publications", "h1")
         else:
             self.status = False
             print(f'error at check_search_page: {self.type} not accepted')
             logger.debug(f'error at check_search_page: {self.type} not accepted')
         return self.status
 
+    def save(self):
+        if hasattr(self, 'Mongo'):
+            self.Mongo.insert(self.dict_page)
+            print(f'{len(self.dict_page)} companies updated')
+            self.Mongo.drop_duplicates(colsel='task_index', coldup='RCS')
+        else:
+            print(f'error at save: mongo not specified')
+            logger.debug(f'error at save: mongo not specified')
+            sys.exit()
+
+
     def record_RCS_content(self):
         #print(" - record_RCS_content(RCS, content)")
         dict_page = BASE_DICT.copy()
-        dict_page['extraction_date'] = date.today().strftime("%d/%m/%Y")
+        dict_page['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
         dict_page['RCS'] = self.rcs
-        dict_page['status'] = 'scrapped'
+        dict_page['status'] = 'scraped'
+        dict_page['info'] = self.info
+        dict_page['task_index'] = self.task_index
         dict_page['info'] = self.info
         self.dict_page.append(dict_page)
 
@@ -398,17 +410,36 @@ class connection():
         #print(" - record_empty_RCS(RCS)")
         logger.info(f"record_empty_RCS({self.rcs})")
         dict_page = BASE_DICT.copy()
-        dict_page['extraction_date'] = date.today().strftime("%d/%m/%Y")
+        dict_page['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
         dict_page['RCS'] = self.rcs
-        dict_page['status'] = 'not_exist'
+        if self.type == 'rbe':
+            dict_page['status'] = 'no_rbe_informations'
+        else:
+            dict_page['status'] = 'doesnt_exist'
+        dict_page['task_index'] = self.task_index
+        dict_page['info'] = self.info
         self.dict_page.append(dict_page)
+
 
     def record_changed_RCS(self):
         #print(" - record_empty_RCS(RCS)")
         logger.info(f"record_empty_RCS({self.rcs})")
         dict_page = BASE_DICT.copy()
-        dict_page['extraction_date'] = date.today().strftime("%d/%m/%Y")
+        dict_page['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
         dict_page['RCS'] = self.rcs
-        dict_page['status'] = 'scrapped'
+        dict_page['status'] = 'scraped'
+        dict_page['info'] = self.info
         dict_page['changed_RCS_number'] = True
+        dict_page['task_index'] =self.task_index
+        self.dict_page.append(dict_page)
+
+    def record_notregist_BO(self):
+        #print(" - record_notregist_BO(RCS)")
+        logger.info(f"record_empty_RCS({self.rcs})")
+        dict_page = BASE_DICT.copy()
+        dict_page['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
+        dict_page['RCS'] = self.rcs
+        dict_page['info'] = self.info
+        dict_page['status'] = 'not_registrated_BO'
+        dict_page['task_index'] = self.task_index
         self.dict_page.append(dict_page)

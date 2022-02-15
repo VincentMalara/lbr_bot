@@ -14,3 +14,4 @@ URL_LBR = 'https://www.lbr.lu/mjrcs-lbr/jsp/'
 URL_RESA = 'https://www.lbr.lu/mjrcs-resa/jsp/'
 
 scraper_version = '3.00'
+parser_version = '3.00'

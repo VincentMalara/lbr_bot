@@ -4,18 +4,23 @@ import time
 from selenium.webdriver.common.keys import Keys
 
 
-from src.scrapers.main import connection
+from src.scrapers.main import scraper
 from src.utils.set_logger import main as set_logger
 
 
 logger = set_logger()
 
 
-class rcs(connection):
+class Rcs(scraper):
     def __init__(self,  **kwargs):
         print("---running in rcs mode---")
         self.type = 'rcs'
-        connection.__init__(self, type_='rcs',  **kwargs)
+        if 'Mongo' in kwargs.keys():
+            scraper.__init__(self, type_='rcs', mongo=kwargs['Mongo'])
+        else:
+            scraper.__init__(self, type_='rcs')
+            print(f'info rcs scrper init: no Mongo set')
+            logger.info(f'info rcs scrper init: no Mongo set')
 
     def scrap_rcs(self):
         self.check_search_page()
