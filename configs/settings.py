@@ -1,4 +1,4 @@
-mongo_ip = 'localhost'
+mongo_ip = '146.59.152.231' #'localhost'
 mongo_port = 27017
 mongo_DB = 'LBR_test'
 col_RCS = 'RCS'

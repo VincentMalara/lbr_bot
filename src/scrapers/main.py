@@ -40,6 +40,7 @@ class scraper():
         self.rcs_list = []
         self.rcs = ''
         self.info = ''
+        self.page = ''
         self.dict_page = []
         self.Nlimit = 10
         if mongo is not None:
@@ -305,7 +306,8 @@ class scraper():
 
     def extract_page(self):
         print(' - extract_LBR_page()')
-        page = beautifulsoup.BeautifulSoup(self.driver.page_source,  features="html.parser")
+        #page = beautifulsoup.BeautifulSoup(self.driver.page_source,  features="html.parser")
+        page = self.page
         if self.type == 'rcs':
             dict_info = {"id": "content"}
             self.info = str(page.find('div', dict_info))
@@ -325,6 +327,7 @@ class scraper():
 
     def scrap_list(self, rcs_list=None):
         status = False
+        msg=''
         if rcs_list is None:
             print('error at rcs.scrap_list : rcs_list input is missing')
             logger.error('error at rcs.scrap_list : rcs_list input is missing')
@@ -334,6 +337,7 @@ class scraper():
         if not status:
             print(msg)
             logger.error(msg)
+            sys.exit()
 
         if status:
             self.dict_page = []
@@ -427,9 +431,8 @@ class scraper():
         dict_page = BASE_DICT.copy()
         dict_page['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
         dict_page['RCS'] = self.rcs
-        dict_page['status'] = 'scraped'
+        dict_page['status'] = 'changed_RCS_number'
         dict_page['info'] = self.info
-        dict_page['changed_RCS_number'] = True
         dict_page['task_index'] =self.task_index
         self.dict_page.append(dict_page)
 

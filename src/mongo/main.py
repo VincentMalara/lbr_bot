@@ -31,20 +31,22 @@ class mongo():
             df_found = pd.DataFrame(list(self.collection.find(dictin, dictout))) #in case you need only few columns
         return df_found
 
-    def get_RCSlist(self, dictin=None): #take as input a dict
+    def get_RCSlist(self, dictin=None): #take as input a dict or list of RCS to check existing one
         df_found = []
         if dictin is None:
             dictin = {}
             print('info at mongo.get_RCSlist : no input dict provided, complete collection will be returned')
-
+        if isinstance(dictin, list):
+            print("info at mongo.get_RCSlist input is a list, it will be converted to a mongo query")
+            dictin = {"RCS": {'$in': dictin}}
         if isinstance(dictin, dict):
             df_found = self.find(dictin, {'RCS': 1, '_id': 0}) #in case you need only RCS list
             if df_found.shape[0] == 0:
-                print("mongo.get_RCSlist returned empty result")
+                print("info at mongo.get_RCSlist returned empty result")
             else:
                 df_found = df_found['RCS'].to_list()
         else:
-            print(f"mongo.get_RCSlist input is not a dict, {type(dictin)} not accepted")
+            print(f"error at mongo.get_RCSlist input is not a dict, {type(dictin)} not accepted")
         return df_found
 
 

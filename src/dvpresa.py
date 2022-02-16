@@ -1,5 +1,5 @@
 from configs import settings
-from src.scrapers.rbe.main import Rbe
+from src.scrapers.rbe.scraper import Rbe
 from src.scrapers.resa.main import Resa
 from src.utils.task_index import main as task_index
 

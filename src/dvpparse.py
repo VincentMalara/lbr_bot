@@ -1,8 +1,8 @@
 import pandas as pd
 
 from configs import settings
-from src.scrapers.rbe.main import Rbe
-from src.scrapers.rcs.main import Rcs
+from src.scrapers.rbe.scraper import Rbe
+from src.scrapers.rcs.scraper import Rcs
 from src.html_parsers.main import rcs as rcsparser
 from src.html_parsers.main import rbe as rbeparser
 

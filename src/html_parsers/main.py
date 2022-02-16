@@ -1,7 +1,7 @@
 import pandas as pd
 
-from .rcs.main import main as rcsparser
-from .rbe.main import main as rbeparser
+from .rcs.parser import main as rcsparser
+from .rbe.parser import main as rbeparser
 from src.utils.task_index import main as task_index
 
 

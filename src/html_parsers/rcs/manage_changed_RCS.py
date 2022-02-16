@@ -7,6 +7,8 @@ def main(Mongo):
     tobechanged = pd.DataFrame()
     tobechanged['RCS'] = changed['Replaced by']
     tobechanged['old RCS'] = changed['RCS']
+    if 'old RCS' in raw.columns:
+        raw.drop(columns=['old RCS'], inplace=True)
     raw = raw.merge(tobechanged, on='RCS', how='left')
     raw['task_index'] = raw['task_index']+1
     raw['changed_RCS_number'] = 'new_one'
