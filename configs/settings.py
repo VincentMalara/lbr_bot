@@ -1,3 +1,13 @@
+import os
+
+
+if os.name == 'nt':
+    executablepath = 'geckodriver.exe'
+else:
+    executablepath = 'geckodriver'
+
+
+
 mongo_ip = '146.59.152.231' #'localhost'
 mongo_port = 27017
 mongo_DB = 'LBR_test'
@@ -15,3 +25,4 @@ URL_RESA = 'https://www.lbr.lu/mjrcs-resa/jsp/'
 
 scraper_version = '3.00'
 parser_version = '3.00'
+

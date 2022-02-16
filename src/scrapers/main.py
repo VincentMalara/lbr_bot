@@ -67,7 +67,8 @@ class scraper():
         self.quit()
         self.profile = webdriver.FirefoxProfile()
         self.profile.set_preference("general.useragent.override", self.useragent.random)
-        self.driver = webdriver.Firefox(options=self.options, firefox_profile=self.profile, executable_path='geckodriver.exe')
+        self.driver = webdriver.Firefox(options=self.options, firefox_profile=self.profile,
+                                        executable_path=settings.executablepath)
 
 
     def get_url(self):
