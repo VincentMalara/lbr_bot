@@ -10,34 +10,6 @@ from .utils.timer import performance_timer
 from src.mongo.main import mongo
 from src.mongo.utils import insert_empty_RCS
 
-import requests
-
-URL = 'https://www.lbr.lu/'
-
-response = requests.get(URL)
-
-print(response)
-#print(response.content)
-
-
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-options = Options()
-options.headless = True
-profile = webdriver.FirefoxProfile()
-profile.set_preference("intl.accept_languages","fr")
-driver = webdriver.Firefox(options=options, firefox_profile=profile,
-                                        executable_path=settings.executablepath)
-import time
-driver.get(URL)
-#print(driver.page_source)
-
-print('----')
-xx = "Accéder au registre de commerce et des sociétés"
-time.sleep(3)
-connection = driver.find_element_by_class_name("rcs")
-connection.click()
-print(driver.page_source)
 
 
 timer_main = performance_timer()
