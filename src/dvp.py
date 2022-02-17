@@ -10,6 +10,12 @@ from .utils.timer import performance_timer
 from src.mongo.main import mongo
 from src.mongo.utils import insert_empty_RCS
 
+import requests
+
+response = requests.get('https://api.github.com')
+
+print(response)
+print(response.content)
 
 
 timer_main = performance_timer()
