@@ -68,7 +68,7 @@ class scraper():
         self.options = Options()
         self.options.headless = self.headless
         self.profile = webdriver.FirefoxProfile()
-        #self.profile.set_preference("general.useragent.override", self.useragent.random)
+        self.profile.set_preference("general.useragent.override", self.useragent.random)
         self.driver = webdriver.Firefox(options=self.options, firefox_profile=self.profile,
                                         executable_path=settings.executablepath)
 
