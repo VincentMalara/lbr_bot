@@ -25,6 +25,7 @@ from selenium.webdriver.firefox.options import Options
 options = Options()
 options.headless = True
 profile = webdriver.FirefoxProfile()
+profile.set_preference("intl.accept_languages","fr")
 driver = webdriver.Firefox(options=options, firefox_profile=profile,
                                         executable_path=settings.executablepath)
 import time
