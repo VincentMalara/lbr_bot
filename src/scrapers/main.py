@@ -347,6 +347,7 @@ class scraper():
             N = 0
             for rcs in self.rcs_list:
                 N+=1
+                print(f"N: {N}")
                 print(f"rcs: {rcs}")
                 self.rcs = rcs
                 trial = 0
