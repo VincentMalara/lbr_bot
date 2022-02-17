@@ -80,6 +80,7 @@ class scraper():
             self.status = True
         except Exception as e:
             self.status = False
+            print(f'error at get_url: {e}')
             ee = e
         return ee
 
@@ -113,9 +114,9 @@ class scraper():
             self.driver.quit()
             print('driver has been closed')
             logger.info('driver has been closed')
-        except:
+        except Exception as e:
             logger.debug('not managed to close driver properly')
-            pass
+            print(f'error at quit : {e}')
 
     def accept_t(self):
         #print(' - accept_t()')
@@ -300,7 +301,8 @@ class scraper():
             print('accepted')
         try:
             self.check_connected()
-        except:
+        except Exception as e:
+            print(f'error at launch: {e}')
             self.status = False
 
     def check_page(self, check_phrase, type_):

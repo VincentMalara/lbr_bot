@@ -36,7 +36,7 @@ RCSlist = ['A39456', 'B100006', 'B100007', 'B100008', 'B100009', 'B106338', 'B12
            'B221018', 'B221019', 'B248373', 'B249879', 'B255380', 'B262114', 'B39099', 'B56047', 'E1879', 'E2226', 'E229',
            'E2818', 'E4589', 'E4738', 'E5555', 'E7052', 'E7905', 'E831']
 
-
+#RCSlist = ['B15491']
 
 #0 - create not existing RCS in RCS collection
 insert_empty_RCS(RCSlist, Mongorcs)

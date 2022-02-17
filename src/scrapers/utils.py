@@ -8,9 +8,6 @@ from src.utils.set_logger import main as set_logger
 logger = set_logger()
 
 
-
-
-
 def get_numbers(x):
     if isinstance(x, str):
         y = re.findall('[0-9]+', x)
@@ -56,7 +53,7 @@ def check_page(driver, check_phrase, type_):
             #print(f'{check_phrase} not found in {type_}')
             #logger.debug(f'{check_phrase} not found in {type_}')
     except Exception as e:
-        #print(f'Not connected to {check_phrase} properly, error : {e}')
+        print(f'Not connected to {check_phrase} properly, error : {e}')
         #logger.debug(f'Not connected to {check_phrase} properly, error : {e}')
         page_status = False
     return page_status

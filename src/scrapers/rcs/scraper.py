@@ -36,7 +36,7 @@ class Rcs(scraper):
                         self.page = BeautifulSoup(self.driver.page_source, features="html.parser")
                         rcsstatus = scrap_page_check(self.page, self.rcs)
                         print(f"trial at scrap_rcs: {trial}")
-                        if rcsstatus['test_err']:
+                        if rcsstatus['test_err'] and trial > 4:
                             # RCS number des not exist (red banner)
                             print("RCS doesn't exist")
                             self.status = True
@@ -76,8 +76,10 @@ class Rcs(scraper):
                     back = self.driver.find_element_by_link_text('Recherche')
                     back.click()
                     print('clicked to recherche')
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"error at search_rcs while clicking on recherche: {e}")
+
+
                 test_page_search = self.check_search_page()
                 if trial > 20:
                     print(f'error at search_rcs: max trial at going to search page reached')
