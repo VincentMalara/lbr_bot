@@ -33,7 +33,7 @@ BASE_DICT = {
 
 
 class scraper():
-    def __init__(self, type_='rcs', headless=True, mongo=None):
+    def __init__(self, type_='rcs', headless=settings.headless, mongo=None):
         self.headless = headless
         self.type = type_
         self.status = True
@@ -65,6 +65,8 @@ class scraper():
     def reset(self):
         #print(' - reset()')
         self.quit()
+        self.options = Options()
+        self.options.headless = self.headless
         self.profile = webdriver.FirefoxProfile()
         self.profile.set_preference("general.useragent.override", self.useragent.random)
         self.driver = webdriver.Firefox(options=self.options, firefox_profile=self.profile,
