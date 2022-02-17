@@ -1,4 +1,5 @@
 from src.scrapers.rbe.scraper import Rbe
+from configs import settings
 
 def main(rcs, mongo):
     n=0
@@ -6,7 +7,7 @@ def main(rcs, mongo):
     while not test:
         print('---------')
         print(n)
-        scraper = Rbe(headless=False, Mongo=mongo)
+        scraper = Rbe(headless=settings.headless, Mongo=mongo)
         scraper.launch()
         test = scraper.status
         n += 1

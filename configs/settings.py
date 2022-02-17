@@ -3,12 +3,14 @@ import os
 
 if os.name == 'nt':
     executablepath = 'geckodriver.exe'
+    mongo_ip = 'localhost'
+    headless = False
 else:
     executablepath = 'geckodriver'
+    mongo_ip = '146.59.152.231'
+    headless = True
 
 
-
-mongo_ip = '146.59.152.231' #'localhost'
 mongo_port = 27017
 mongo_DB = 'LBR_test'
 col_RCS = 'RCS'

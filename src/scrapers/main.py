@@ -33,7 +33,7 @@ BASE_DICT = {
 
 
 class scraper():
-    def __init__(self, type_='rcs', headless=False, mongo=None):
+    def __init__(self, type_='rcs', headless=True, mongo=None):
         self.headless = headless
         self.type = type_
         self.status = True
