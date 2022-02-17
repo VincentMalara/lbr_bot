@@ -33,11 +33,12 @@ RCSlist = ["B120248", "B15268", "B15467", "B15425","B15489", "B15490", "B15492",
            'E7052',  'B1202461',   'B262114',  'B182934']
 
 
+
 #0 - create not existing RCS in RCS collection
 insert_empty_RCS(RCSlist, Mongorcs)
 
 #0 - set_to_be_updated
-Mongorcs.set_to_be_updated(RCSlist)
+Mongorcs.set_to_be_updated()
 
 #2 - scrap RCS list in RCS
 RCS_to_scrap = Mongorcs.get_RCSlist({'status': 'to_be_updated'})
