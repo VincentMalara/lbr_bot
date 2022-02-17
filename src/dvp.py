@@ -12,7 +12,9 @@ from src.mongo.utils import insert_empty_RCS
 
 import requests
 
-response = requests.get('https://api.github.com')
+URL = 'https://www.lbr.lu/mjrcs/jsp'
+
+response = requests.get(URL)
 
 print(response)
 print(response.content)
@@ -26,9 +28,8 @@ profile = webdriver.FirefoxProfile()
 driver = webdriver.Firefox(options=options, firefox_profile=profile,
                                         executable_path=settings.executablepath)
 
-driver.get('https://api.github.com')
+driver.get(URL)
 print(driver.page_source)
-
 
 
 timer_main = performance_timer()
