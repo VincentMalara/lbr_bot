@@ -12,12 +12,12 @@ from src.mongo.utils import insert_empty_RCS
 
 import requests
 
-URL = 'https://www.lbr.lu/mjrcs/jsp'
+URL = 'https://www.lbr.lu/'
 
 response = requests.get(URL)
 
 print(response)
-print(response.content)
+#print(response.content)
 
 
 from selenium import webdriver
@@ -27,8 +27,15 @@ options.headless = True
 profile = webdriver.FirefoxProfile()
 driver = webdriver.Firefox(options=options, firefox_profile=profile,
                                         executable_path=settings.executablepath)
-
+import time
 driver.get(URL)
+#print(driver.page_source)
+
+print('----')
+xx = "Accéder au registre de commerce et des sociétés"
+time.sleep(3)
+connection = driver.find_element_by_class_name("rcs")
+connection.click()
 print(driver.page_source)
 
 
