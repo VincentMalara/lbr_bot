@@ -12,10 +12,10 @@ col_RCS = settings.col_RCS
 
 
 class mongo():
-    def __init__(self, db=mongo_DB,  col=col_RCS):
+    def __init__(self, db=mongo_DB,  col=col_RCS, ip=mongo_ip, port=mongo_port):
         self.db = db
         self.col = col
-        self.conn = pymongo.MongoClient(mongo_ip, mongo_port)
+        self.conn = pymongo.MongoClient(ip, port)
         print('connected to DB:' + self.db)
         print('connected to collection:' + self.col)
         self.collection = self.conn[db][col]
