@@ -29,7 +29,7 @@ rcs_scraper(RCS_to_scrap, Mongorcs)
 
 #3 - parse RCS of RCS list
 print('----Parsing RCS---')
-rcs_parser(RCS=RCS_to_scrap, mongo=Mongorcs, mongoparsed=Mongorcsp)
+rcs_parser(mongo=Mongorcs, mongoparsed=Mongorcsp)
 print('----RCS Parsed---')
 
 
