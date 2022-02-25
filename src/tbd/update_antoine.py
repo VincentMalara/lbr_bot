@@ -3,7 +3,7 @@ from src.scrapers.rcs.main import main as rcs_scraper
 from src.html_parsers.rcs.main import main as rcs_parser
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 
 from src.mongo.main import mongo
 

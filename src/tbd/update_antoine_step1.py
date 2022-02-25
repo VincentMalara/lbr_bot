@@ -5,7 +5,7 @@ from src.scrapers.rcs.main import main as rcs_scraper
 from src.html_parsers.rcs.main import main as rcs_parser
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 
 from src.mongo.main import mongo
 from src.mongo.utils import insert_empty_RCS
@@ -24,8 +24,7 @@ col_RCSp = settings.col_RCSp
 Mongorcs = mongo(db=mongo_DB,  col=col_RCS, ip='146.59.152.231')
 Mongorcsp = mongo(db=mongo_DB,  col=col_RCSp, ip='146.59.152.231')
 
-print(Mongorcs.get_RCSlist())
-
+print(Mongorcs.get_RCSlist({'status': 'scraped'}))
 
 RCSlist_df = pd.read_excel('Luxembourg_Juillet 2021_nouvelles entreprises (2).xlsx')
 

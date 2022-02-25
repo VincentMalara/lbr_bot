@@ -17,7 +17,7 @@ col_RCS = 'RCS'
 col_RBE = 'RBE'
 col_RESA = 'RESA'
 col_RCSp = 'RCS_parsed'
-col_RBEp = 'RBE_parsed'
+col_pdfs = 'all_pdfs'
 
 
 URL_RCS = 'https://www.lbr.lu/mjrcs/jsp'
@@ -27,4 +27,6 @@ URL_RESA = 'https://www.lbr.lu/mjrcs-resa/jsp/'
 
 scraper_version = '3.00'
 parser_version = '3.00'
+
+temp = '/temp/'
 
