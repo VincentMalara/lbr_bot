@@ -13,9 +13,21 @@ ACCEPTED_TYPE = ['Modification', 'Comptes annuels (eCDF)', 'Comptes annuels',
                  'Modification non statutaire des mandataires', 'Statuts coordonnés', 'Mise à jour du dossier',
                  'Immatriculation', 'Modification - Changement de la forme juridique', 'Démission']
 
+
 LOCAL_PATH_PDF = os.getcwd() + settings.temp
 
 NDLSTEPS = 100
+
+def check_temp_exist():
+    print(LOCAL_PATH_PDF)
+    if os.path.exists(LOCAL_PATH_PDF):
+        print('temp does exist')
+    else:
+        path = os.path.join(LOCAL_PATH_PDF)
+        os.mkdir(path)
+        print(f"{LOCAL_PATH_PDF} created")
+        print(os.path.exists(LOCAL_PATH_PDF))
+
 
 
 def is_accepeted(x):

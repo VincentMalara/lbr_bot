@@ -1,7 +1,8 @@
 from configs import settings
-from .utils import build_pdfs_list, dl_pdfs_list
+from .utils import build_pdfs_list, dl_pdfs_list, check_temp_exist
 from src.mongo.main import mongo
 
+check_temp_exist()
 
 mongo_DB = settings.mongo_DB
 col_RCSp = settings.col_RCSp
