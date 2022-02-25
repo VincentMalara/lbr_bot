@@ -5,10 +5,12 @@ certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.12
 cryptography==36.0.1
+et-xmlfile==1.1.0
 fake-useragent==0.1.11
 h11==0.13.0
 idna==3.3
 numpy==1.22.1
+openpyxl==3.0.9
 outcome==1.1.0
 pandas==1.4.0
 pycparser==2.21
@@ -22,6 +24,7 @@ six==1.16.0
 sniffio==1.2.0
 sortedcontainers==2.4.0
 soupsieve==2.3.1
+tika==1.24
 trio==0.19.0
 trio-websocket==0.9.2
 urllib3==1.26.8
