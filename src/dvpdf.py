@@ -16,8 +16,10 @@ Mongorcsp = mongo(db=mongo_DB,  col=col_RCSp)
 Mongopdf = mongo(db=mongo_DB,  col=col_pdfs)
 
 
+Mongopdf.delete()
+
 print("***Downloading PDFs***")
-dl_pdfs(mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
+#dl_pdfs(mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
 
 print(f"***completed in {str(timer_main.stop())}s***")
 
