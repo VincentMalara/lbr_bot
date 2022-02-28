@@ -4,8 +4,10 @@ import os
 import glob
 from configs import settings
 import urllib.request
-import tika
-tika.initVM()
+
+#import tika
+#tika.initVM()
+
 from tika import parser
 
 
