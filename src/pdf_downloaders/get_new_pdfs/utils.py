@@ -7,8 +7,7 @@ import urllib.request
 
 #import tika
 #tika.initVM()
-
-from tika import parser
+#from tika import parser
 
 
 ACCEPTED_TYPE = ['Modification', 'Comptes annuels (eCDF)', 'Comptes annuels',
@@ -118,5 +117,6 @@ def get_pdf_content(x):
 def downloadfile(url, ext='.pdf'):
     path = os.path.join(LOCAL_PATH_PDF, (url.split('/')[-1] + ext))
     urllib.request.urlretrieve(url, path)
-    raw = parser.from_file(path)
+    #raw = parser.from_file(path)
+    raw = " "
     return {'path': path, 'file': raw}
