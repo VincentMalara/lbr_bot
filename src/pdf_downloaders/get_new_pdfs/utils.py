@@ -19,6 +19,14 @@ LOCAL_PATH_PDF = os.getcwd() + settings.temp
 
 NDLSTEPS = 100
 
+def clean_temp():
+    files = glob.glob(os.path.join(LOCAL_PATH_PDF+'/*'))
+    n=0
+    for iteration, item in enumerate(files):
+        os.remove(item)
+        n = iteration
+    return n
+
 def check_temp_exist():
     print(LOCAL_PATH_PDF)
     if os.path.exists(LOCAL_PATH_PDF):
@@ -94,15 +102,6 @@ def dl_pdfs_list(pdfs='', mongo_pdfs=''):
     mongo_pdfs.insert(dllist)
 
     return n_downloaded
-
-
-def clean_temp():
-    files = glob.glob(os.path.join(LOCAL_PATH_PDF+'/*'))
-    n=0
-    for iteration, item in enumerate(files):
-        os.remove(item)
-        n = iteration
-    return n
 
 
 def get_pdf_content(x):
