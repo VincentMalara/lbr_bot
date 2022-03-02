@@ -2,6 +2,7 @@ import pandas as pd
 
 
 def main(Mongo):
+    print('processing changed RCS')
     changed = Mongo.find({"changed_RCS_number": 'old_one'})
     raw = Mongo.find_from_RCSlist(RCS=changed['Replaced by'].to_list())
     tobechanged = pd.DataFrame()

@@ -1,5 +1,4 @@
 import pandas as pd
-from datetime import datetime
 
 def clean_list_dict_nan(x): #allow to delete nan or empty value in a dict or a list of dict
     if isinstance(x, dict):
@@ -14,22 +13,24 @@ def clean_list_dict_nan(x): #allow to delete nan or empty value in a dict or a l
                 y.append({})
     return y
 
-def insert_empty_RCS(rcs, mongo):
-    if isinstance(rcs, str):
-        rcs = [rcs]
-    if isinstance(rcs, list):
-        existing = mongo.get_RCSlist(rcs)
-        tobecreated = [rcs for rcs in rcs if rcs not in existing]
-        if len(tobecreated)>0:
-            DF = pd.DataFrame()
-            DF['RCS'] = rcs
-            DF['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
-            DF['status'] = "to_be_updated"
-            DF['info'] = ''
-            DF['scraper_version'] = ''
-            DF['task_index'] = 0
-            mongo.insert(DF)
+def rcs_input_checker(RCS='', fct_name = ''):
+    dict_ = None
+    list_ = None
+    if isinstance(RCS, pd.DataFrame):  # in case input RCS is a dataframe
+        print(f"{fct_name} in dataframe mode")
+        if 'RCS' in RCS.columns:
+            list_ = RCS['RCS'].to_list()
+            dict_ = {"RCS": {'$in': list_}}
         else:
-            print(f"info at insert_empty_RCS: no RCS to input")
+            print(f"{fct_name} there is no RCS columns in dataframe")
+    elif isinstance(RCS, list):  # in case input RCS is a list
+        list_ = RCS
+        dict_ = {"RCS": {'$in': RCS}}
+        print(f"{fct_name} in list mode")
+    elif isinstance(RCS, str):  # in case input RCS is a single value
+        dict_ = {"RCS": RCS}
+        list_ = [RCS]
+        print(f"{fct_name} in unique mode")
     else:
-        print(f"error at insert_empty_RCS: {type(rcs)} cannot be used as input")
+        print(f'error at {fct_name}: not accepted input format. DF, list or dict accepted')
+    return list_, dict_

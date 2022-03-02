@@ -6,7 +6,7 @@ import pandas as pd
 import bs4 as beautifulsoup
 
 from .utils import *
-from src.scrapers.main import scraper
+from src.scrapers.scraper import scraper
 from src.utils.set_logger import main as set_logger
 
 logger = set_logger()

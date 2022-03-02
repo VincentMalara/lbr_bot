@@ -1,9 +1,12 @@
-import pymongo
-import pandas as pd
+from datetime import datetime
 import sys
 
+import pandas as pd
+import pymongo
+
 from configs import settings
-from .utils import clean_list_dict_nan
+from .utils import clean_list_dict_nan, rcs_input_checker
+
 
 mongo_ip = settings.mongo_ip
 mongo_port = settings.mongo_port
@@ -55,22 +58,7 @@ class mongo():
         if RCS is None:
             print('error at mongo.find_from_RCSlist : at least a RCS  number is needed')
         else:
-            dict_ = None
-            if isinstance(RCS, pd.DataFrame): # in case input RCS is a dataframe
-                print("mongo.find_from_RCSlist in dataframe mode")
-                if 'RCS' in RCS.columns:
-                    dict_ = {"RCS": {'$in': RCS['RCS'].to_list()}}
-                else:
-                    print("mongo.find_from_RCSlist there is no RCS columns in dataframe")
-            elif isinstance(RCS, list): # in case input RCS is a list
-                dict_ = {"RCS": {'$in': RCS}}
-                print("mongo.find_from_RCSlist in list mode")
-            elif isinstance(RCS, str): # in case input RCS is a single value
-                dict_ = {"RCS":  RCS}
-                print("mongo.find_from_RCSlist in unique mode")
-            else:
-                print('error at mongo.find_from_RCSlist : not accepted input format. DF, list or dict accepted')
-
+            list_, dict_ = rcs_input_checker(RCS=RCS, fct_name='find_from_RCSlist')
             if dict_ is not None:
                 if only:
                     df_found = self.find(dict_,{'RCS': 1, '_id': 0}) #in case you need only RCS list
@@ -174,6 +162,8 @@ class mongo():
         return status
 
     def set_status(self, newstatus: str = None, RCS = None): #take as input a RCS number, a list or a DF with a RCS column
+        print(f'setting status to {newstatus}')
+        print(RCS)
         if newstatus is None:
             print('error at mongo.set_status : no newstatus set')
             sys.exit()
@@ -183,20 +173,7 @@ class mongo():
             if RCS is None:
                 print('info at mongo.set_status : no RCS set, all col will be updated')
             else:
-                if isinstance(RCS, pd.DataFrame): # in case input RCS is a dataframe
-                    print("mongo.find_from_RCSlist in dataframe mode")
-                    if 'RCS' in RCS.columns:
-                        dict_ = {"RCS": {'$in': RCS['RCS'].to_list()}}
-                    else:
-                        print("mongo.find_from_RCSlist there is no RCS columns in dataframe")
-                elif isinstance(RCS, list): # in case input RCS is a list
-                    dict_ = {"RCS": {'$in': RCS}}
-                    print("mongo.find_from_RCSlist in list mode")
-                elif isinstance(RCS, str): # in case input RCS is a single value
-                    dict_ = {"RCS":  RCS}
-                    print("mongo.find_from_RCSlist in unique mode")
-                else:
-                    print('error at mongo.find_from_RCSlist : not accepted input format. DF, list or dict accepted')
+                list_, dict_ = rcs_input_checker(RCS=RCS, fct_name='set_status')
             self.update(dict_, updater)
 
     def set_to_be_updated(self, RCS = None):
@@ -209,37 +186,30 @@ class mongo():
                 if colsel is None:
                     colsel = "task_index"
                     print('coldup set to task_index')
-                else:
-                    print('task_index not in Dataframe ')
-                try:
-                    DF = DF.sort_values(by="task_index", ascending=False).reset_index(drop=True)
-                except Exception:
-                    print('not possible to sort task_index columns')
             else:
-                print('no colsel input ')
+                print('task_index not in Dataframe ')
+                sys.exit()
 
             if coldup is None:
                 if "RCS" in DF.columns:
                     coldup = 'RCS'
                     print('coldup set to RCS')
                 else:
-                    if "_id" in DF.columns:
-                        print('id')
-                        self.delete({"_id": {'$in': list(DF['_id'].unique())}})
-                    else:
-                        print('no id delete all')
-                        self.delete(DF.to_dict('records'))
-                    print('insert DF after drop dup')
-                    self.insert(DF.drop_duplicates(keep='last'))
+                    print('RCS not in Dataframe ')
+                    sys.exit()
 
             if colsel is not None:
                 if colsel in DF.columns:
                     if coldup is not None:
                         if coldup in DF.columns:
-                            DF = DF.sort_values(by=[coldup, colsel], ascending=True).reset_index(drop=True)
-                            list_ = list(DF[coldup].unique())
-                            self.delete({coldup: {'$in': list_}})
+                            duplicated = DF[DF[coldup].duplicated()].reset_index(drop=True)
+                            duplicated_list = duplicated[coldup].to_list()
+                            DF = self.find_from_RCSlist(duplicated_list)
+                            if "task_index" in DF.columns:
+                                DF = DF.sort_values(by="task_index", ascending=True).reset_index(drop=True)
+                            self.delete(data=duplicated_list, RCS=True)
                             self.insert(DF.drop_duplicates(subset=[coldup], keep='last'))
+
                         else:
                             print(f'error at mongo.drop_duplicates : {coldup} not found in {self.col}')
                     else:
@@ -259,6 +229,29 @@ class mongo():
             index = 0
             print(f'task_index not in {self.col}')
         return index
+
+    def insert_empty_RCS(self, RCS, update_existing=True):
+
+        RCS, dict_ = rcs_input_checker(RCS=RCS, fct_name='insert_empty_RCS')
+
+        if isinstance(RCS, list):
+            existing = self.get_RCSlist(RCS)
+            tobecreated = [rcs for rcs in RCS if rcs not in existing]
+            if len(tobecreated) > 0:
+                DF = pd.DataFrame()
+                DF['RCS'] = tobecreated
+                DF['extraction_date'] = datetime.today().strftime("%d/%m/%Y")
+                DF['status'] = "to_be_updated"
+                DF['info'] = ''
+                DF['scraper_version'] = ''
+                DF['task_index'] = 0
+                self.insert(DF)
+            else:
+                print(f"info at insert_empty_RCS: no RCS to input")
+            if update_existing:
+                self.set_to_be_updated(RCS=RCS)
+        else:
+            print(f"error at insert_empty_RCS: {type(RCS)} cannot be used as input")
 
 
     def close(self): #close the connection  when finish

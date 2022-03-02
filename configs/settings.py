@@ -17,8 +17,10 @@ col_RCS = 'RCS'
 col_RBE = 'RBE'
 col_RESA = 'RESA'
 col_RCSp = 'RCS_parsed'
+col_RBEp = 'RBE_parsed'
 col_pdfs = 'all_pdfs'
-
+col_finan = 'financials' #bilans to ratio
+col_publi = 'publications' #immat, modifications... to build admin/asso history
 
 URL_RCS = 'https://www.lbr.lu/mjrcs/jsp'
 URL_RBE = 'https://www.lbr.lu/mjrcs-rbe/'

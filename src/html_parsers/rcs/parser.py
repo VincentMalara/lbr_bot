@@ -3,12 +3,10 @@ import pandas as pd
 
 import bs4 as beautifulsoup
 
-from src.html_parsers.utils import clean_spaces, translator, get_pdflink
 from configs import settings
-from src.utils.set_logger import main as set_logger
+from src.html_parsers.utils import clean_spaces, translator, get_pdflink
 from ..utils import replaced_RCS
 
-logger = set_logger()
 
 
 def main(row, task_index=-1):
@@ -137,6 +135,6 @@ def main(row, task_index=-1):
     else:
         print(f"error ar rcs.parser: input is not a dict")
 
-    print(dictout)
+    #print(dictout)
 
     return dictout

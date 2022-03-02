@@ -3,7 +3,7 @@ import time
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
 
-from src.scrapers.main import scraper
+from src.scrapers.scraper import scraper
 from src.utils.set_logger import main as set_logger
 from src.scrapers.utils import scrap_page_check
 
