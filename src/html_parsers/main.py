@@ -24,7 +24,7 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
         mongoparsed.delete()
 
     task_index = mongoparsed.get_index_max() + 1
-    dict_ = {'status':'scrapped'}
+    dict_ = {'status':'scraped'}
     if RCS is not None:
         list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
         if not status:
