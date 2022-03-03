@@ -20,22 +20,25 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
     elif type_ == 'rbe':
         from src.html_parsers.rbe.parser import main as parser
 
-    if not onlynew:
+    if not onlynew and RCS is None:
         mongoparsed.delete()
 
     task_index = mongoparsed.get_index_max() + 1
-    dict_ = {'status':'scraped'}
+
     if RCS is not None:
         list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
         if not status:
             print(msg)
             sys.exit()
-        dict_ = {**dict_, **dict_rcs}
-
-    base_RCS_list = mongo.get_RCSlist(dict_)
+        mongoparsed.delete(dict_rcs)
+        base_RCS_list = list_
+    else:
+        dict_ = {'status': 'scraped'}
+        base_RCS_list = mongo.get_RCSlist(dict_)
 
 
     RCS_splited_lists = rcs_spliter(base_RCS_list, NMAX)
+    print(len(RCS_splited_lists))
 
     RCSDF = pd.DataFrame()
     test = False
@@ -66,8 +69,9 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
         else: #not only new
             if RCS is None: #--> repars all in ths case
                 #print("All RCS will be reparsed")
-                RCSDF = mongo.find_from_RCSlist(rcslist)
                 task_index = -1
+            RCSDF = mongo.find_from_RCSlist(rcslist)
+
 
         if RCSDF.shape[0] == 0:
             print('RCSDF is empty')

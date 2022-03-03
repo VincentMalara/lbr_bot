@@ -25,7 +25,7 @@ Mongopubli = mongo(db=settings.mongo_DB,  col=settings.col_publi)
 
 
 # 1 - create not existing RCS in RCS collection, and update the existing ones
-
+'''
 RCSlist=Mongorcsp.get_RCSlist({'ToRescrap':True})
 print(RCSlist)
 Mongorcs.insert_empty_RCS(RCSlist,  update_existing=True)
@@ -36,11 +36,11 @@ print('----Scraping RCS---')
 RCSlist_scr = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
 print(RCSlist_scr)
 print('----RCS Scraped---')
-
-
+'''
+RCSlist=Mongorcs.get_RCSlist({'extraction_date':"03/03/2022"})
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
-rcs_parser(type_='rcs',RCS=RCSlist, mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=True)
+rcs_parser(type_='rcs',RCS=RCSlist, mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 print('----RCS Parsed---')
 
 
