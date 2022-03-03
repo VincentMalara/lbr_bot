@@ -18,7 +18,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
         mongoparsed.delete()
 
     task_index = mongoparsed.get_index_max() + 1
-    dict_ = {'status':'scraped'}
+    dict_ = {'status':'scrapped'}
     if RCS is not None:
         list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
         if not status:
@@ -45,7 +45,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
         else:
             if RCS is None: #--> repars all in ths case
                 #print("All RCS will be reparsed")
-                RCSDF = mongo.find(dict_)
+                RCSDF = mongo.find_from_RCSlist(rcslist)
                 task_index = -1
 
         if RCSDF.shape[0] > 0:

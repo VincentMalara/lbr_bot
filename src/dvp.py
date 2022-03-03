@@ -110,6 +110,9 @@ print('----RCS Scraped---')
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
 
+
+#Mongorcs = mongo('LBR_new',  col='LBR_RCS_31052021')
+
 rcs_parser( mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 
 print('----RCS Parsed---')
@@ -123,6 +126,9 @@ print('----RBE Scraped---')
 
 # 5 - parse RBE of RCS list
 print('----Parsing RCS---')
+
+#Mongorbe = mongo('LBR_new',  col='LBR_RBE')
+
 rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
 print('----RCS Parsed---')
 

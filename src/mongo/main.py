@@ -46,6 +46,7 @@ class mongo():
         if isinstance(dictin, dict):
             df_found = self.find(dictin, {'RCS': 1, '_id': 0}) #in case you need only RCS list
             if df_found.shape[0] == 0:
+                df_found = []
                 print("info at mongo.get_RCSlist returned empty result")
             else:
                 df_found = df_found['RCS'].to_list()

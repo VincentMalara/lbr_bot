@@ -11,12 +11,13 @@ def main(rcs, n):
             print('RCS spliter : conversion from dataframe to list')
         else:
             print('error at RCS spliter : no RCS column id DF')
-            sys.exit
+            #sys.exit
     if isinstance(rcs, list):
         rcs_arrays = np.array_split(rcs, len(rcs) // n + 1)
         rcs_list = [list(array) for array in rcs_arrays]
         #print(rcs_list)
     else:
-        print('error at RCS spliter : {type(rcs)} not accepted as input (only list or DataFrame)')
-        sys.exit
+        print(f'error at RCS spliter : {type(rcs)} not accepted as input (only list or DataFrame)')
+        #sys.exit
+    print('split done')
     return rcs_list

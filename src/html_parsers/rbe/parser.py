@@ -32,7 +32,7 @@ def main(row, task_index=-1):
 
             if "Vous n'avez pas accès aux formalités de dépôt électroniques." in Content.get_text():
                 dictout['ToRescrap'] = True
-                print("Vous n'avez pas accès aux formalités de dépôt électroniques.")
+                #print("Vous n'avez pas accès aux formalités de dépôt électroniques.")
             else:
                 dictout['ToRescrap'] = False
                 for li in Content.find_all('li'):
@@ -139,9 +139,7 @@ def main(row, task_index=-1):
                 else:
                     pass
         else:
-            print("row[info] not a string")
-            print(row['RCS'])
-            print(row['info'])
+            #print("row[info] not a string")
             dictout['ToRescrap'] = True
     else:
         print(f"error ar rbe.parser: input is not a dict")

@@ -110,7 +110,7 @@ def main(row, task_index=-1):
                             depot['depot'] = get_pdflink(elements[4])
                         except Exception:
                             depot['depot'] = 'empty'
-                            print(f"One empty dépots for RCS:  {str(row['RCS'])}s")
+                            print(f"One empty dépots for RCS:  {str(row['RCS'])}")
                         depots.append(depot)
                         # print(depots)
                 if depot:

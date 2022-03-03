@@ -44,7 +44,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
         else:
             if RCS is None: #--> repars all in ths case
                 #print("All RCS will be reparsed")
-                RCSDF = mongo.find(dict_)
+                RCSDF = mongo.find_from_RCSlist(rcslist)
                 task_index = -1
 
         if RCSDF.shape[0] > 0:
