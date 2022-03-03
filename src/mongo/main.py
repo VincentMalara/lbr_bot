@@ -5,7 +5,8 @@ import pandas as pd
 import pymongo
 
 from configs import settings
-from .utils import clean_list_dict_nan, rcs_input_checker
+from .utils import clean_list_dict_nan
+from src.utils.handle_RCS_list import main as rcs_input_checker
 
 
 mongo_ip = settings.mongo_ip
@@ -58,7 +59,7 @@ class mongo():
         if RCS is None:
             print('error at mongo.find_from_RCSlist : at least a RCS  number is needed')
         else:
-            list_, dict_ = rcs_input_checker(RCS=RCS, fct_name='find_from_RCSlist')
+            list_, dict_, status, msg = rcs_input_checker(RCS=RCS)
             if dict_ is not None:
                 if only:
                     df_found = self.find(dict_,{'RCS': 1, '_id': 0}) #in case you need only RCS list
@@ -183,7 +184,7 @@ class mongo():
             if RCS is None:
                 print('info at mongo.set_status : no RCS set, all col will be updated')
             else:
-                list_, dict_ = rcs_input_checker(RCS=RCS, fct_name='set_status')
+                list_, dict_, status, msg = rcs_input_checker(RCS=RCS)
             self.update(dict_, updater)
 
     def set_to_be_updated(self, RCS = None):
@@ -242,7 +243,7 @@ class mongo():
 
     def insert_empty_RCS(self, RCS, update_existing=True):
 
-        RCS, dict_ = rcs_input_checker(RCS=RCS, fct_name='insert_empty_RCS')
+        RCS, dict_, status, msg = rcs_input_checker(RCS=RCS)
 
         if isinstance(RCS, list):
             existing = self.get_RCSlist(RCS)

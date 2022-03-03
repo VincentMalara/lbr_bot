@@ -1,10 +1,13 @@
+import sys
+
+
 import pandas as pd
 
 
 from configs import settings
 from src.html_parsers.rcs.parser import main as parser
 from .manage_changed_RCS import main as manage_changed_RCS
-from src.mongo.main import rcs_input_checker
+from src.utils.handle_RCS_list import main as rcs_input_checker
 from src.utils.RCS_spliter import main as rcs_spliter
 
 
@@ -17,7 +20,10 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
     task_index = mongoparsed.get_index_max() + 1
     dict_ = {'status':'scraped'}
     if RCS is not None:
-        list_, dict_rcs = rcs_input_checker(RCS=RCS, fct_name='rcs.parser')
+        list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
+        if not status:
+            print(msg)
+            sys.exit()
         dict_ = {**dict_, **dict_rcs}
 
     base_RCS_list = mongo.get_RCSlist(dict_)

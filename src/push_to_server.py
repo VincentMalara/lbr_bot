@@ -4,15 +4,33 @@ from src.html_parsers.rcs.main import main as rcs_parser
 from src.html_parsers.rbe.main import main as rbe_parser
 import pandas as pd
 
-''''
 timer_main = performance_timer()
+
+RCS = [
+'B158195',
+'B158194',
+'B195389',
+'B113285',
+'B62466',
+'B13069',
+'B190703',
+'B77001',
+'B63694',
+'B79748',
+'B225866',
+'B113003',
+'B70221',
+'B254096',
+
+]
+
 
 
 Mongorcs_old = mongo(db='LBR_new',  col='LBR_RCS_31052021')
-Mongorcs_server = mongo(ip='146.59.152.231', db='LBR_test',  col='RCS')
+Mongorcs_server = mongo( db='LBR_test',  col='RCS')
 
 print('loading')
-data = Mongorcs_old.find()
+data = Mongorcs_old.find_from_RCSlist(RCS=RCS)
 print(f"loaded in {str(timer_main.stop())}s")
 
 data = data[['info', 'RCS', 'status', 'extraction_date', 'scrapper_version']]
@@ -35,11 +53,11 @@ timer_main = performance_timer()
 
 
 Mongorcs_old = mongo(db='LBR_new',  col='LBR_RBE')
-Mongorcs_server = mongo(ip='146.59.152.231', db='LBR_test',  col='RBE')
+Mongorcs_server = mongo( db='LBR_test',  col='RBE')
 
 
 print('loading')
-data = Mongorcs_old.find()
+data = Mongorcs_old.find_from_RCSlist(RCS=RCS)
 print(f"loaded in {str(timer_main.stop())}s")
 
 data = data[['info', 'RCS', 'status', 'extraction_date', 'scrapper_version']]
@@ -53,7 +71,7 @@ print(data.head())
 
 Mongorcs_server.insert(data)
 
-
+'''
 Mongorcs_server = mongo(ip='146.59.152.231', db='LBR_test',  col='RCS')
 Mongorbe_server = mongo(ip='146.59.152.231', db='LBR_test',  col='RBE')
 
@@ -63,7 +81,7 @@ Mongorcs_server.drop_duplicates(colsel='task_index', coldup='RCS')
 print('Mongorbe_server.drop_duplicates')
 Mongorbe_server.drop_duplicates(colsel='task_index', coldup='RCS')
 print('processed')
-'''
+
 
 
 Mongorcs = mongo(ip='146.59.152.231', db='LBR_test',  col='RCS')
@@ -81,5 +99,6 @@ print('----Parsing RCS---')
 rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
 print('----RCS Parsed---')
 
+'''
 
 print(f"completed in {str(timer_main.stop())}s")

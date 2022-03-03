@@ -140,6 +140,8 @@ def main(row, task_index=-1):
                     pass
         else:
             print("row[info] not a string")
+            print(row['RCS'])
+            print(row['info'])
             dictout['ToRescrap'] = True
     else:
         print(f"error ar rbe.parser: input is not a dict")

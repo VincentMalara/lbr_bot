@@ -4,7 +4,7 @@ import sys
 
 
 def main(rcs, n):
-    print(f'RCS spliter : spliting RCS in {n} list')
+    print(f'RCS spliter : spliting RCS in {len(rcs) // n + 1} list')
     if isinstance(rcs, pd.DataFrame): #conversion from DF to list if needed
         if 'RCS' in rcs.columns:
             rcs = rcs['RCS'].to_list()

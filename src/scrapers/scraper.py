@@ -12,7 +12,7 @@ from selenium.webdriver.firefox.options import Options
 from configs import settings
 from src.utils.set_logger import main as set_logger
 from src.scrapers.utils import check_page, answer_question, get_numbers
-from src.utils.handle_RCS_list import HandleRcsList
+from src.utils.handle_RCS_list import main as HandleRcsList
 from src.utils.task_index import main as task_index
 
 logger = set_logger()
@@ -338,7 +338,7 @@ class scraper():
             print('error at rcs.scrap_list : rcs_list input is missing')
             logger.error('error at rcs.scrap_list : rcs_list input is missing')
         else:
-            self.rcs_list, status, msg = HandleRcsList(rcs_list)
+            self.rcs_list, dict_,  status, msg = HandleRcsList(rcs_list)
 
         if not status:
             print(msg)

@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 
 from configs import settings
-from src.mongo.utils import rcs_input_checker
+from src.utils.handle_RCS_list import main as rcs_input_checker
 
 
 def main(type_='RCS', rcs=None, mongo=None, to_be_updated=False): #if to_be_updated, RCS has to be empty
@@ -28,9 +28,11 @@ def main(type_='RCS', rcs=None, mongo=None, to_be_updated=False): #if to_be_upda
         else:
             print("missing mongo collection in rcs scraper in to_be_updated mode")
     else:
-        rcs, dict_ = rcs_input_checker(RCS=rcs, fct_name=f"{type_} scraper")
-        if len(rcs)>0:
+        rcs, dict_, status, msg = rcs_input_checker(RCS=rcs)
+        if len(rcs)>0 and status:
             run_scraper = True
+        else:
+            print(msg)
 
     if run_scraper:
         n = 0
