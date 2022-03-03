@@ -36,14 +36,16 @@ print('----Scraping RCS---')
 RCSlist_scr = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
 print(RCSlist_scr)
 print('----RCS Scraped---')
-'''
+
 RCSlist=Mongorcs.get_RCSlist({'extraction_date':"03/03/2022"})
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
 rcs_parser(type_='rcs',RCS=RCSlist, mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 print('----RCS Parsed---')
+'''
 
 
+rcs_parser(type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
 print(f"completed in {str(timer_main.stop())}s")
 
 
