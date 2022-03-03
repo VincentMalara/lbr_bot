@@ -111,10 +111,20 @@ class mongo():
         if data is None:
             data = {}
         status = False
-        if isinstance(data, pd.DataFrame):
+        if isinstance(data, pd.DataFrame) and not RCS:
             data = data.to_dict('records')
             for row in data:
                 self.collection.delete_many(row)
+        elif isinstance(data, pd.DataFrame) and RCS:
+            print('list of RCS')
+            if 'RCS' in data.columns:
+                try:
+                    dict_ = {"RCS": {'$in': data['RCS'].to_list()}}
+                    self.collection.delete_many(dict_)
+                except Exception as e:
+                    print(f'error at mongo.delete: {e}')
+            else:
+                print('error at delete: no RCS columns in input DF')
         elif isinstance(data, list) and not RCS:
             print('list of RCS')
             for row in data:

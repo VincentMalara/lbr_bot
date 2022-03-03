@@ -118,7 +118,7 @@ def main(row, task_index=-1):
                 else:
                     #logger.info(f"complete empty dépots for RCS:  {str(row['RCS'])}")
                     dictout['ToRescrap'] = False
-                    print(f"complete empty dépots for RCS:  {str(row['RCS'])}")
+                    #print(f"complete empty dépots for RCS:  {str(row['RCS'])}")
             else:
                 #logger.info(f"complete empty dépots for RCS:  {str(row['RCS'])}, no <tr> found")
                 print(f"complete empty dépots for RCS:  {str(row['RCS'])}, no <tr> found")

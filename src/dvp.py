@@ -109,7 +109,9 @@ print('----RCS Scraped---')
 
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
-rcs_parser( mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
+
+rcs_parser( mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=True)
+
 print('----RCS Parsed---')
 
 
@@ -121,7 +123,7 @@ print('----RBE Scraped---')
 
 # 5 - parse RBE of RCS list
 print('----Parsing RCS---')
-rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=True)
 print('----RCS Parsed---')
 
 # 6 - download new pdf not yet downloaded
