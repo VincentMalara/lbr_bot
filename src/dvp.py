@@ -1,6 +1,6 @@
 from configs import settings
 from src.scrapers.main import main as scraper
-from src.html_parsers.rcs.main import main as rcs_parser
+from src.html_parsers.main import main as rcs_parser
 from src.html_parsers.rbe.main import main as rbe_parser
 #from src.pdf_downloaders.main import main as pdf_downloader
 #from src.pdf_parsers.financials.main import main as financials_parser
@@ -113,7 +113,7 @@ print('----Parsing RCS---')
 
 #Mongorcs = mongo('LBR_new',  col='LBR_RCS_31052021')
 
-rcs_parser( mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
+rcs_parser(type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 
 print('----RCS Parsed---')
 
@@ -129,7 +129,7 @@ print('----Parsing RCS---')
 
 #Mongorbe = mongo('LBR_new',  col='LBR_RBE')
 
-rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+#rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
 print('----RCS Parsed---')
 
 # 6 - download new pdf not yet downloaded

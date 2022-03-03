@@ -5,7 +5,7 @@ if os.name == 'nt':
     executablepath = 'geckodriver.exe'
     mongo_ip = 'localhost'
     headless = False
-    NMAX = 1000
+    NMAX = 10000
 else:
     executablepath = 'geckodriver'
     mongo_ip = '146.59.152.231'

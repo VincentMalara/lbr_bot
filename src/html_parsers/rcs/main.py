@@ -2,6 +2,7 @@ import sys
 
 
 import pandas as pd
+import numpy as np
 
 
 from configs import settings
@@ -18,7 +19,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
         mongoparsed.delete()
 
     task_index = mongoparsed.get_index_max() + 1
-    dict_ = {'status':'scraped'}
+    dict_ = {'status':'scrapped'}
     if RCS is not None:
         list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
         if not status:
@@ -34,28 +35,43 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
     RCSDF = pd.DataFrame()
     test = False
 
-    for rcslist in RCS_splited_lists:
+    for count, rcslist in enumerate(RCS_splited_lists):
+        print(count)
         if onlynew:
             alreadydone = mongoparsed.find_from_RCSlist(rcslist)
+            print('already done done')
             if 'RCS' in alreadydone.columns:
                 if alreadydone.shape[0] > 0:
-                    dict_on = {"RCS": {'$nin': alreadydone['RCS'].to_list()}}
-                    dict_ = {**dict_, **dict_on}
+                    rcslist = np.array(rcslist)
+                    print(rcslist.shape)
+                    rcslist=rcslist[~np.isin(rcslist, alreadydone['RCS'])].tolist()
+                    print(len(rcslist))
+            if len(rcslist) > 0:
+                dict_split = {"RCS": {'$in': rcslist}}
+                dict_ = {**dict_, **dict_split}
                 RCSDF = mongo.find(dict_)
-        else:
+                print('RCSDF done')
+            else:
+                status = False
+        else: #not only new
             if RCS is None: #--> repars all in ths case
                 #print("All RCS will be reparsed")
                 RCSDF = mongo.find_from_RCSlist(rcslist)
                 task_index = -1
 
-        if RCSDF.shape[0] > 0:
+        if RCSDF.shape[0] == 0:
+            status = False
+
+        if status:
+            print('processing')
             RCSparsed = RCSDF.apply(lambda x: parser(x, task_index), axis=1).to_list()
+            print('processed')
             if onlynew:
                 mongoparsed.delete(data=RCSDF, RCS=True)
+                print('deleted')
             mongoparsed.insert(RCSparsed)
+            print('inserted')
             test = True
-        else:
-            print("error in rcs parser : empty dataframe")
 
     if test:
         manage_changed_RCS(mongoparsed)
