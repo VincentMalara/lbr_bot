@@ -113,7 +113,7 @@ print('----Parsing RCS---')
 
 #Mongorcs = mongo('LBR_new',  col='LBR_RCS_31052021')
 
-rcs_parser(type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
+#rcs_parser(type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 
 print('----RCS Parsed---')
 
@@ -129,7 +129,7 @@ print('----Parsing RCS---')
 
 #Mongorbe = mongo('LBR_new',  col='LBR_RBE')
 
-#rbe_parser(mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+rcs_parser(type_='rbe', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=True)
 print('----RCS Parsed---')
 
 # 6 - download new pdf not yet downloaded

@@ -13,6 +13,13 @@ from src.utils.RCS_spliter import main as rcs_spliter
 NMAX = settings.NMAX
 
 def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
+    AAA = mongo.find()
+    print(AAA.head())
+    print(AAA.shape)
+
+    AAA = mongoparsed.find()
+    print(AAA.head())
+    print(AAA.shape)
 
     if type_ == 'rcs':
         from src.html_parsers.rcs.parser import main as parser
@@ -33,7 +40,8 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
         mongoparsed.delete(dict_rcs)
         base_RCS_list = list_
     else:
-        dict_ = {'status': 'scraped'}
+        #dict_ = {'status': 'scraped'}
+        dict_ = {}
         base_RCS_list = mongo.get_RCSlist(dict_)
 
 

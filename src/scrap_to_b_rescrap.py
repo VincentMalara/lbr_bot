@@ -45,7 +45,18 @@ print('----RCS Parsed---')
 '''
 
 
-rcs_parser(type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+#rcs_parser(type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+
+
+
+
+# 4 - scrap RCS list in RBE: only the one in no ro new as changed RCS
+
+Mongorbe.set_to_be_updated(dictin={'status':'to_be_scrapped'})
+print('----Scraping RBE---')
+RBElist = scraper(type_='RBE', mongo=Mongorbe, to_be_updated=True)
+print('----RBE Scraped---')
+
 print(f"completed in {str(timer_main.stop())}s")
 
 

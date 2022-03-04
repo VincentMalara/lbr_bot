@@ -173,7 +173,7 @@ class mongo():
             status = False
         return status
 
-    def set_status(self, newstatus: str = None, RCS = None): #take as input a RCS number, a list or a DF with a RCS column
+    def set_status(self, newstatus: str = None, RCS=None, dictin=None): #take as input a RCS number, a list or a DF with a RCS column and a dict
         print(f'setting status to {newstatus}')
         print(RCS)
         if newstatus is None:
@@ -181,15 +181,18 @@ class mongo():
             sys.exit()
         else:
             updater = {'status': newstatus}
-            dict_ = {}
-            if RCS is None:
-                print('info at mongo.set_status : no RCS set, all col will be updated')
+            if dictin is not None:
+                dict_ = dictin
             else:
-                list_, dict_, status, msg = rcs_input_checker(RCS=RCS)
+                dict_ = {}
+
+            if RCS is not None:
+                list_, dictrcs, status, msg = rcs_input_checker(RCS=RCS)
+                dict_ = {**dict_, **dictrcs}
             self.update(dict_, updater)
 
-    def set_to_be_updated(self, RCS = None):
-        self.set_status(newstatus='to_be_updated', RCS=RCS)
+    def set_to_be_updated(self, RCS = None, dictin=None):
+        self.set_status(newstatus='to_be_updated', RCS=RCS, dictin=dictin)
 
     def drop_duplicates(self, colsel=None, coldup=None, seldict={}):
         DF = self.find(seldict)
