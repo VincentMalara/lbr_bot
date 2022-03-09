@@ -18,24 +18,34 @@ import xmltodict
 Mongo = mongo(col=settings.col_RESA)
 Mongo_parsed = mongo(col=settings.col_RESAp)
 
-Mongo.delete()
+#Mongo.delete()
+#Mongo_parsed.delete()
 
 n=0
 test = False
 while not test and n<5:
-    scraper = Resa(headless=False)
+    scraper = Resa(mongoRESA=Mongo, mongoRESAparsed=Mongo_parsed)
     scraper.launch()
     test = scraper.status
     print('---------')
     n += 1
     print(n)
 
-for month in ['Novembre', "Décembre"]:
-    scraper.scrap_day('2021', month)
-    Mongo.insert(scraper.pages)
+monthlist = [ 'Juillet-2021', 'Août-2021', 'Septembre-2021', 'Octobre-2021', 'Novembre-2021', 'Décembre-2021',
+                    'Janvier-2022', 'Février-2022']
 
+for monthyear in monthlist:
+    month = monthyear.split('-')[0]
+    year = monthyear.split('-')[1]
+    scraper.scrap_month(year, month)
+    scraper.push_pages_to_mongo()
+    scraper.extract_xmls()
+
+
+print('scrapping done')
+'''
+print('starting dl and parsing')
 DF = Mongo.find()
-
 output = []
 for index, row in DF.iterrows():
     urls = row['url']
@@ -67,8 +77,8 @@ for index, row in DF.iterrows():
             dictout['status'] = 'to_be_updated'
             output.append(dictout)
 
-
 Mongo_parsed.insert(output)
+'''
 
 print(f"connected in {str(timer_main.stop())}s")
 
