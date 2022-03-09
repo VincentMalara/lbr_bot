@@ -32,14 +32,12 @@ class Resa(scraper):
         self.type = 'resa'
         scraper.__init__(self, type_='resa',  **kwargs)
 
-    def scrap_day(self):
+    def scrap_day(self, year='2022', month='Février'):
         self.check_search_page()
         print(self.status)
-        self.pages = self.build_resa_list()
+        self.pages = self.build_resa_list(year, month)
 
-    def build_resa_list(self):
-        year = '2022'
-        month = 'Février'
+    def build_resa_list(self, year, month):
         pages = pd.DataFrame()
         Y = self.driver.find_element_by_name('selectedYear')
         if year in [y.get_attribute("text") for y in Y.find_elements_by_tag_name("option")]:

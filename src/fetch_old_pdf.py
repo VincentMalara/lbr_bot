@@ -65,4 +65,4 @@ Mongopubli.delete()
 #pdflist=pdflist[pdflist['RCS'] == "F11549"]   #B218577  B231625  B179072" B213483  B252807  B218577  B245085
 
 
-parser(mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
+pdf_downloader(RCS=RCSlist, mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
