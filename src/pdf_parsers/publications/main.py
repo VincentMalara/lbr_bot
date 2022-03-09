@@ -1,19 +1,18 @@
-from src.mongo.main import rcs_input_checker
+from src.utils.handle_RCS_list import main as rcs_input_checker
 from src.pdf_parsers.publications.parser import main as parser
 from src.pdf_parsers.publications.utils import *
+from src.pdf_downloaders.utils import is_valid_publi
 
 
 def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
     task_index = mongoparsed.get_index_max() + 1
     dict_ = {}
     if RCS is not None:
-        list_, dict_rcs = rcs_input_checker(RCS=RCS, fct_name='publi.parser')
+        list, dict_rcs,  status, msg = rcs_input_checker(RCS=RCS)
         dict_ = {**dict_, **dict_rcs}
 
     RCSDF = mongo.find(dict_)
-
-    RCSDF = RCSDF[RCSDF.apply(is_valid_bilan, axis=1)].reset_index(drop=True)
-
+    RCSDF = RCSDF[RCSDF.apply(is_valid_publi, axis=1)].reset_index(drop=True)
 
     if onlynew:
         alreadydone = mongoparsed.find_from_RCSlist(RCSDF)

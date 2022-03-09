@@ -40,8 +40,8 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
         mongoparsed.delete(dict_rcs)
         base_RCS_list = list_
     else:
-        #dict_ = {'status': 'scraped'}
-        dict_ = {}
+        dict_ = {'status': 'scraped'}
+        #dict_ = {}
         base_RCS_list = mongo.get_RCSlist(dict_)
 
 

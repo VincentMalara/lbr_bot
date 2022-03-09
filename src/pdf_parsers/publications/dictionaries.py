@@ -11,6 +11,18 @@ list_CR = [str.lower(x) for x in list_CR]
 
 splitters = ['annexe aux comptes annuels', 'Comptes annuels pour l’exercice','annexe aux comptes au', 'anhang für die veröffentlichung', 'notes to the annual accounts', 'notes to the accounts', 'general information']
 
+OBJECTS_DICTS = {
+    'Objet social': {'indic': 'Objet social (indication)', 'incomp': 'Objet social incomplet'},
+    'Objet': {'indic': 'Objet (indication)', 'incomp': "Objet incomplet"},
+    'Objet du commerce': {'indic': 'Objet du commerce', 'incomp': "Objet du commerce incomplet"},
+    'Zweck der Gesellschaft': {'indic': 'Zweck der Gesellschaft (Kurzfassung)',
+                               'incomp': "Unvollständiger Zweck der Gesellschaft"},
+    'Tätigkeiten': {'indic': 'Tätigkeiten (Kurzfassung)', 'incomp': "Unvollständige Tätigkeiten"},
+    'Activités': {'indic': 'Activités (indication)', 'incomp': "Activités incomplètes"},
+    'Zweck': {'indic': 'Zweck (Kurzfassung)', 'incomp': "Unvollständiger Zweck"}
+}
+
+
 DICT_PERSONNE = {
     'ADM': {'regex': r"\d+ Nouvel administrateur / gérant", 'label': 'Administrateur(s) / Gérant(s)'},
     'DGJ': {'label': 'Délégué(s) à la gestion journalière', 'regex': r"\d+ Nouveau délégué à la gestion journalière"},
@@ -63,12 +75,14 @@ PERSON_MERGED_REVERSED = {
 
 DICT_PERSONNE_SPLITTERS = {
     'regex1':  r"^\d+ (.+ )+(p|P)age \d+ \✔$",
-    'regex2':  r"^\d+ ",
-    'regex3':  r" Page \d+ / \d+$",
+    'regex2':  r"^@@\d+ ", #@@ added to be sure to replace only first occurence
+    'regex3':  r"[ ]*Page \d+ / \d+$", #[ ]* added instead of simple ' '
     'page':  'page',
     'raye':  "Modifier Rayer ✔",
     'modifie':  "Modifier ✔ Rayer",
-    'demission':  "✔ Démission d"}
+    'demission':  "✔ Démission d",
+}
+
 
 
 DICT_DONNEES_A_MODIF = {
@@ -169,6 +183,28 @@ REPLACE_PHRASE = {
     'Prüfungsbeauftragte(r) der Geschäftsbuchführung': 'Personne(s) chargée(s) du contrôle des comptes',
     'Verschmelzung / Spaltung': 'Fusion / Scission',
     'freiwillige Liquidation': 'Liquidation volontaire',
+
+    "Privatperson": 'Personne physique',
+    "Juristische Person aus Luxemburg": "Personne morale luxembourgeoise",
+    "Privat oder Berufsadresse" :'Adresse privée ou professionnelle',
+    "Art des Mandats": 'Type de mandat',
+    "Gesellschaftsorgan": 'Organe social',
+    "Amtsausführung":'Fonction',
+    "Zeichnungsberechtigung (Kurzfassung)": 'Pouvoir de signature (indication)',
+    "Dauer des Mandats":'Durée du mandat',
+    "Bestellungsdatum":'Date de nomination',
+    #"Dauer des Mandats":'Durée du mandat',
+    "Ablaufdatum des Mandats":"Date d'expiration du mandat",
+    "bis zum Jahr, in dem die Generalversammlung stattfinden wird": "jusqu'à l'assemblée générale qui se tiendra en l'année",
+    "Privatperson" : 'Personne physique',
+    #"Name":'Nom',
+    "Vorname(n)":'Prénom(s)',
+    "Geburtsdatum":"Date de naissance",
+    "Geburtsort":"Lieu de naissance",
+    "Geburtsland":"Pays de naissance",
+    "Handelsregisternummer": "N° d'immatriculation au RCS",
+
+
     "Hausnummer Strasse": 'Numéro Rue',
     "Hausnummer": 'Numéro',
     'Strasse': 'Rue',
@@ -183,7 +219,13 @@ REPLACE_PHRASE = {
     'Währung': 'Devise',
     'Unbegrenzt': 'Illimitée',
     'unbegrenzt': 'Illimitée',
-    'Art': 'Type'
+    'Art': 'Type',
+    'Bezeichnung': 'Dénomination',
+    "Sitz": "Siège",
+
+    'Dauer': "Durée",
+    "Name": 'Nom',
+
 
     #'Geschäftsführer'
     # 'Komplementär(e)'
@@ -208,7 +250,12 @@ REPLACE_WORD = {
     'Seite': 'Page',
     "Ändern löschen ✔": "Modifier Rayer ✔",
     "Ändern ✔ löschen": "Modifier ✔ Rayer",
-    "✔ Rücktrittserklärung d": "✔ Démission d"
+   "Ändern ✔ Löschen": "Modifier ✔ Rayer",
+    "✔ Rücktrittserklärung d": "✔ Démission d",
+    "Ändern Löschen ✔": "Modifier Rayer ✔",
+    "Ändern Löschen" : "Modifier Rayer",
+
+
 
 }
 
@@ -241,7 +288,48 @@ TRAD_SPLITERS={
     'Tägliche Geschäftsführung': 'Délégué(s) à la gestion journalière',
     'Prüfungsbeauftragte(r) der Geschäftsbuchführung': 'Personne(s) chargée(s) du contrôle des comptes'	,
     'Verschmelzung / Spaltung': 'Fusion / Scission',
+
+    'Verwaltungs- und Zeichnungsberechtigte(r)': 'Personne(s) autorisée(s) à gérer, administrer et signer',
+
+    "Verwaltungsgesellschaft":"Société de gestion",
+    "Datum der Gründungsurkunde": "Date de constitution",
+    "Datum der Geschäftseröffnung":"Date de création du commerce",
+    "Mitglied(er) des Verwaltungsorgans":"Personne(s) autorisée(s) à gérer, administrer et signer",
+    "Geschäftsführer":"Gérant(s)",
+
+
+
     'freiwillige Liquidation': 'Liquidation volontaire',
+    'Bezeichnung': 'Dénomination',
+
+    "Sitz": "Siège",
+    'Dauer': "Durée",
+    "Name des Fonds": 'Nom du fonds',
+    "Name":'Nom',
+
+
+
 # 'Geschäftsführer'
 # 'Komplementär(e)'
 }
+
+SUBPERSOINFO_DICT = {
+    'Adresse privée ou professionnelle': ['Numéro', 'Rue', 'Code postal', 'Localité', 'Pays' ],
+    'Type de mandat': ['Organe social', 'Fonction', 'Pouvoir de signature (indication)'],
+    'Parts sociales': ['Type(s) de parts (le cas échéant) Nombre de parts détenues'],
+    'Durée du mandat': ['Date de nomination', 'Durée du mandat', "Date d'expiration du mandat", "jusqu'à l'assemblée générale qui se tiendra en l'année"],
+    'Siège': ['Numéro', 'Rue', 'Code postal', 'Localité', 'Pays']
+}
+
+
+
+'''
+    if list_[1] in ['Personne physique', "Personne morale luxembourgeoise", "Personne morale étrangère"]:
+
+
+    'Adresse privée ou professionnelle': ['Numéro', 'Rue', 'Code postal', 'Localité', 'Pays' ],
+    ],
+    'Parts sociales': ['Type(s) de parts (le cas échéant) Nombre de parts détenues'],
+    
+    'Siège': ['Numéro', 'Rue', 'Code postal', 'Localité', 'Pays' ]
+'''

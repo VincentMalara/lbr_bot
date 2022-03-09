@@ -25,18 +25,31 @@ NDLSTEPS = 100
 tika.initVM()
 
 
-def is_valid_bilan(row):
+def is_valid_pdf(row, type_):
     depots = row['Type_de_depot']
     year = datetime.strptime(row['Date'], '%d/%m/%Y').year
     y = False
-    if year >= 2014 :
-        for label in FILE_LABEL_LIST:
-            if label in depots:
-                y = True
-                break
+    if type_ in ['all', 'publi']:
+        if year >= 2014 :
+            for label in FILE_LABEL_LIST:
+                if label in depots:
+                    y = True
+                    break
+    if type_ in ['all', 'bilan']:
+        if 'eCDF' in depots:
+            y = True
+    return y
 
-    if 'eCDF' in depots:
-        y = True
+def is_valid_bilan(row):
+    y = is_valid_pdf(row, 'bilan')
+    return y
+
+def is_valid_publi(row):
+    y = is_valid_pdf(row, 'publi')
+    return y
+
+def is_valid_all(row):
+    y = is_valid_pdf(row, 'all')
     return y
 
 
@@ -102,7 +115,8 @@ class PdfDownloader:
                     df = pd.DataFrame(publis)
                     df['RCS'] = RCS
                     DFout = pd.concat([DFout, df])
-        self.pdfs = DFout[DFout.apply(is_valid_bilan, axis=1)].reset_index(drop=True)
+        self.pdfs = DFout[DFout.apply(is_valid_all, axis=1)].reset_index(drop=True)
+
 
         if "N_depot" in self.pdfs.columns: #remove all the existing depot already in the pdf collection
             if "N_depot" in self.already_done_pdfs.columns:
