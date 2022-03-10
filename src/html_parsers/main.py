@@ -13,13 +13,6 @@ from src.utils.RCS_spliter import main as rcs_spliter
 NMAX = settings.NMAX
 
 def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
-    AAA = mongo.find()
-    print(AAA.head())
-    print(AAA.shape)
-
-    AAA = mongoparsed.find()
-    print(AAA.head())
-    print(AAA.shape)
 
     if type_ == 'rcs':
         from src.html_parsers.rcs.parser import main as parser

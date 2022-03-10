@@ -89,6 +89,7 @@ def downloadfile(url, ext='.pdf'):
     return {'path': path, 'file': raw}
 
 
+
 class PdfDownloader:
     def __init__(self, RCS='', mongo_rcsparsed='', mongo_pdfs=''):
         if RCS is None:
@@ -150,4 +151,3 @@ class PdfDownloader:
         self.mongo_pdfs.insert(dllist)
 
         return n_downloaded
-
