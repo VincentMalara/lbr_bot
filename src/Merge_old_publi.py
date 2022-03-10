@@ -7,6 +7,10 @@ from src.utils.RCS_spliter import main as rcs_spliter
 Mongo_old_bilan = mongo(ip='146.59.152.231',db='LBR_test', col='all_pdf_old')
 Mongo_allpdfs = mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 
+Mongorcs = mongo(ip='146.59.152.231', db='LBR_test', col='RCS')
+
+Mongorcs.set_to_be_updated(dictin={'extraction_date':'10/03/2022', 'task_index'=-1})
+
 
 Mongo_old_bilan_DF = Mongo_old_bilan.find(dictin={}, dictout={'N_depot': 1, '_id': 0})
 Mongo_old_bilan_depot = Mongo_old_bilan_DF['N_depot'].unique().tolist()
