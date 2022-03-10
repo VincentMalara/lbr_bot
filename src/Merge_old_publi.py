@@ -19,7 +19,6 @@ print(len(Mongo_old_bilan_depot))
 base_depot_list = Mongo_old_bilan_DF[~Mongo_old_bilan_DF['N_depot'].isin(Mongo_new_bilan_depot)]['N_depot'].to_list()
 
 print(len(base_depot_list))
-1/0
 
 #'_id', 'N_depot', 'Date', 'Type_de_depot', 'Detail', 'depot', 'RCS','file', 'extraction_date', 'task_index'
 
