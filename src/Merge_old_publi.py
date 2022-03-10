@@ -16,9 +16,10 @@ Mongo_new_bilan_depot = Mongo_allpdfs_bilan_DF['N_depot'].unique().tolist()
 
 print(len(Mongo_old_bilan_depot))
 
-base_depot_list = [depot for depot in Mongo_old_bilan_depot if depot not in Mongo_new_bilan_depot]
+base_depot_list = Mongo_old_bilan_DF[~Mongo_old_bilan_DF['N_depot'].isin(Mongo_new_bilan_depot)]['N_depot'].to_list()
 
 print(len(base_depot_list))
+1/0
 
 #'_id', 'N_depot', 'Date', 'Type_de_depot', 'Detail', 'depot', 'RCS','file', 'extraction_date', 'task_index'
 
