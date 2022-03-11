@@ -196,7 +196,7 @@ REPLACE_PHRASE = {
     #"Dauer des Mandats":'Durée du mandat',
     "Ablaufdatum des Mandats":"Date d'expiration du mandat",
     "bis zum Jahr, in dem die Generalversammlung stattfinden wird": "jusqu'à l'assemblée générale qui se tiendra en l'année",
-    "Privatperson" : 'Personne physique',
+    #"Privatperson" : 'Personne physique',
     #"Name":'Nom',
     "Vorname(n)":'Prénom(s)',
     "Geburtsdatum":"Date de naissance",
@@ -235,6 +235,7 @@ REPLACE_PHRASE = {
 
 
 REPLACE_WORD = {
+    "Neuer Geschäftsführer": "Nouveau gérant", #????
     'Neuer Verwaltungs- und Zeichnungsberechtigter': "Nouvelle personne autorisée à gérer, administrer et signer",
     "Neues Vorstandsmitglied / Neuer Geschäftsführer":	"Nouvel administrateur / gérant",
     "Neuer Teilhaber": "Nouvel associé",
@@ -261,6 +262,7 @@ REPLACE_WORD = {
 
 
 TRAD_SPLITERS={
+    "Komplementär(e)": "Associé(s) commandité(s)",
     'Abzuändernde Angaben': 'Données à modifier',
     'Angaben zur Person': 'Données personnelles',
     'Privatadresse': 'Adresse privée',

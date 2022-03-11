@@ -221,6 +221,7 @@ def get_personne(dict_):
     #print(dict_['depot'])
     #print(dict_['re_splitted'])
     for type_ in DICT_PERSONNE.keys():
+        #print(type_)
         new_list = []
         modif_name_list = []
         pers_dict_list = []
@@ -258,12 +259,12 @@ def get_personne(dict_):
                         #print("regex3 step2", re.search(regex3, previous).group())
                         modraypage = True
 
+                    #print(modif_name_list)
                     if modraypage:
-
                         if previous.lower().replace(' ','') in [x.lower().replace(' ','') for x in modif_name_list]:
                             # .replace(' ','') added in case of missing spaces in the summary page
                             aa = ' '.join([xx.capitalize() for xx in previous.split(' ')])
-
+                            #print(aa)
                             if raye in i:
                                 #print("raye ", raye, ' : ', aa )
                                 pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'rayé','info':get_infos_from_pers(re_splitted[count:])})
@@ -278,14 +279,20 @@ def get_personne(dict_):
                         if nouvel_pers.lower() in previous.lower():
                             #print(nouvel_pers.lower(), ' = ', previous.lower())
                             for new_ in new_list:
+                                #print(new_.lower())
+                                #print(i.lower())
                                 if i.lower() == new_.lower():
                                     pers_dict_list.append({'name': new_.replace(',', '').strip(), 'status':'nouveau','info':get_infos_from_pers(re_splitted[count:])})
                                     new_list.remove(new_) #add new listed in new_list to pers_dict_list, by parsing its page
+                                    #print(pers_dict_list)
+                                    #print('ok')
                                     break
 
 
                     if modray and not modraypage:
                         x = re.search(regex1, ' '.join(i.split()))
+                        #print(regex1)
+                        #print(i)
                         if x:
                             #print("regex1", x.group())
                             aa = "@@" + x.group().split('page')[0].split('Page')[0].strip() #@@ added to be sure to replace only first occurence
@@ -296,8 +303,6 @@ def get_personne(dict_):
                                 #print('aa:', aa)
                                 modif_name_list.append(aa.strip())
                                 #print(modif_name_list)
-
-
 
                     previous = i
 
@@ -417,12 +422,6 @@ def get_sub_info(list_, previous_):#process information from admin/asso page
                 dictout = {}
                 dictout['Durée du mandat'] = 'Indéterminée'
     return dictout
-
-
-
-
-
-
 
 
 def get_data_from_subdict(label, labellist, dict_):

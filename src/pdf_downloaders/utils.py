@@ -27,10 +27,13 @@ tika.initVM()
 
 def is_valid_pdf(row, type_):
     depots = row['Type_de_depot']
-    year = datetime.strptime(row['Date'], '%d/%m/%Y').year
+    try:
+        year = datetime.strptime(row['Date'], '%d/%m/%Y').year
+    except:
+        year = 2000
     y = False
     if type_ in ['all', 'publi']:
-        if year >= 2014 :
+        if year >= 2014:
             for label in FILE_LABEL_LIST:
                 if label in depots:
                     y = True
@@ -107,6 +110,7 @@ class PdfDownloader:
             self.already_done_pdfs = self.mongo_pdfs.find_from_RCSlist(self.RCS)
 
     def get_pdfs_list(self):
+        print('get_pdfs_list')
         DFout = pd.DataFrame()
         for index, row in self.DFrcsparsed.iterrows():
             if 'depots' in row.keys():
@@ -117,16 +121,16 @@ class PdfDownloader:
                     df['RCS'] = RCS
                     DFout = pd.concat([DFout, df])
         self.pdfs = DFout[DFout.apply(is_valid_all, axis=1)].reset_index(drop=True)
-
-
+        #print(self.pdfs)
         if "N_depot" in self.pdfs.columns: #remove all the existing depot already in the pdf collection
             if "N_depot" in self.already_done_pdfs.columns:
                 if self.already_done_pdfs.shape[0] > 0:
                     self.pdfs = self.pdfs[~self.pdfs['N_depot'].isin(self.already_done_pdfs['N_depot'])]
-
+        #print(self.pdfs)
         return self.pdfs
 
     def store_pdfs(self):
+        print('store_pdfs')
         dllist = []
         n = 0
         n_downloaded = 0
@@ -149,5 +153,6 @@ class PdfDownloader:
 
         clean_temp()
         self.mongo_pdfs.insert(dllist)
+        print(f"{n_downloaded} files downloaded")
 
         return n_downloaded

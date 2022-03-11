@@ -4,6 +4,8 @@ from src.html_parsers.main import main as rcs_parser
 from src.pdf_downloaders.main import main as pdf_downloader
 from src.pdf_parsers.financials.main import main as financials_parser
 from src.pdf_parsers.publications.main import main as publi_parser
+from src.utils.RCS_spliter import main as rcs_spliter
+
 
 from .utils.timer import performance_timer
 from src.mongo.main import mongo
@@ -72,6 +74,8 @@ print(len(RCSlist))
 
 #Mongorcs.set_to_be_updated(RCS=DF2["ns2:NumeroRCS"].to_list(), dictin={'extraction_date':{'$nin':['10/03/2022']}})
 #Mongorcs.insert_empty_RCS(RCSlist,  update_existing=False)
+RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'},
+                                        'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
 
 print('----Scraping RCS---')
 RCSlist_scr = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
@@ -80,10 +84,10 @@ print('----RCS Scraped---')
 
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
-rcs_parser(type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=True)
+rcs_parser(RCS=RCSlist, type='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 print('----RCS Parsed---')
 
-
+'''
 # 4 - scrap RCS list in RBE: only the one in no ro new as changed RCS
 print('----Scraping RBE---')
 RBElist = scraper(type_='RBE', mongo=Mongorbe, to_be_updated=True)
@@ -97,19 +101,25 @@ print('----RCBE Parsed---')
 RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
 print(len(RCSlist))
 
-# 6 - download new pdf not yet downloaded
-print('----Downloading pdfs---')
-pdf_downloader(RCS=RCSlist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf) #always consider only new "depot"
-print('----pdfs Downloaded ---')
+RCS_splited_lists = rcs_spliter(RCSlist, 1000)
 
-'''
+#RCS_splited_lists = ["B168088", "B174897", "B187247", "B196099" ]
+
+for rcslist in RCS_splited_lists:
+    # 6 - download new pdf not yet downloaded
+    print('----Downloading pdfs---')
+    #pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf) #always consider only new "depot"
+    print('----pdfs Downloaded ---')
+    print('----parsing publi---')
+    publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=True)
+    print('----publi parsed ---')
+
+
 # 7 - parsing bilan from downloaded pdf
 print('----parsing bilans---')
 financials_parser(RCS=RCSlist,mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
 print('----bilans parsed ---')
-'''
+
 
 # 8 - parsing publi from downloaded pdf
-print('----parsing publi---')
-publi_parser(RCS=RCSlist,mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
-print('----publi parsed ---')
+
