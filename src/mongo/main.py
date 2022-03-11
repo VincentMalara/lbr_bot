@@ -239,7 +239,7 @@ class mongo():
     def get_index_max(self):
         DF = self.find({},{'task_index': 1, '_id': 0})
         if 'task_index' in DF.columns:
-            index = DF['task_index'].apply(lambda x: int(x)).max()
+            index = DF['task_index'].fillna(0).apply(lambda x: int(x)).max()
         else:
             index = 0
             print(f'task_index not in {self.col}')
