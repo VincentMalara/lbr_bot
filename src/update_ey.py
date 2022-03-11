@@ -122,4 +122,5 @@ print('----bilans parsed ---')
 
 
 # 8 - parsing publi from downloaded pdf
+'''
 
