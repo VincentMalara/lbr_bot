@@ -28,6 +28,7 @@ print(len(RCSlist))
 
 
 try:
+    1/0
     RCS_output = pd.read_pickle('rcs_file.pkl')
 except:
     #search by rcs number of SCSP companies from RCS parsed
@@ -74,9 +75,12 @@ except:
 #RBE
 
 try:
+    1/0
     RBE_output = pd.read_pickle('rbe_file.pkl')
 except:
     #search by rcs number of SCSP companies from RCS parsed
+
+
     RBE_list_DF = Mongorbep.find_from_RCSlist(RCS=RCSlist)
     print(RBE_list_DF.shape)
     print('processing RBE')
@@ -85,6 +89,10 @@ except:
     RBE_output['Loi_2004'] = RBE_list_DF['Loi_2004']
     RBE_output['UBO'] = RBE_list_DF['Benef Economiques'].apply(get_ubo)
 
+    def is_not_reg(x):
+        return x == "not_registrated_BO"
+
+    RBE_output['not registrated BO'] = RBE_list_DF['status'].apply(is_not_reg)
 
     def cleanubo(ubos):
         output = []
@@ -182,6 +190,9 @@ print('Merging RBE')
 RCS_output = pd.merge(RCS_output, RBE_output, how='left', on='RCS')
 print('Merging ADM')
 RCS_output = pd.merge(RCS_output, immat_df, how='left', on='RCS')
+
+RCS_output=RCS_output[RCS_output['IsActive']].reset_index(drop=True)
+
 RCS_output.to_excel('full_file.xlsx', index=False)
 print(f"adm Merged, timer : {str(timer_main.stop())}s")
 

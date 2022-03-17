@@ -25,6 +25,14 @@ Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
 
+print('----scraping RCS---')
+RCSlist = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
+print('----RCS scraped---')
+
+1/0
+
+
+
 #Mongorcs.set_status(newstatus='scraped',dictin={'status' : 'to_be_updated', 'extraction_date':{'$nin':["10/03/2022"]}})
 #Mongorbe.set_status(newstatus='scraped',dictin={'status' : 'to_be_updated', 'extraction_date':{'$nin':["10/03/2022"]}})
 
@@ -74,17 +82,29 @@ print(len(RCSlist))
 
 #Mongorcs.set_to_be_updated(RCS=DF2["ns2:NumeroRCS"].to_list(), dictin={'extraction_date':{'$nin':['10/03/2022']}})
 #Mongorcs.insert_empty_RCS(RCSlist,  update_existing=False)
-RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'},
-                                        'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
+RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
+                                        #'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
+
+'''
+#missing nace
+RCSlist = Mongorcsp.get_RCSlist({'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
+Mongorcs.set_to_be_updated(RCS=RCSlist)
+
+#update last 2 month
+DF1 = Mongoresa.find({"month":{"$in":["Janvier", "Février"]}})
+RCSlist = DF1['ns2:NumeroRCS'].to_list()
+Mongorcs.set_to_be_updated(RCS=RCSlist)
+
+
 
 print('----Scraping RCS---')
 RCSlist_scr = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
 print('----RCS Scraped---')
-
+'''
 
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
-rcs_parser(RCS=RCSlist, type='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
+rcs_parser(RCS=RCSlist, type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 print('----RCS Parsed---')
 
 '''

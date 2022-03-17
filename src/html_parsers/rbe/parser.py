@@ -24,6 +24,7 @@ def main(row, task_index=-1):
         dictout['RCS'] = row['RCS']
         dictout['ToRescrap'] = False
         dictout['extraction_date'] = row['extraction_date']
+        dictout['status'] = row['status']
         dictout['parsing_date'] = datetime.today().strftime("%d/%m/%Y")
         dictout['parser_version'] = settings.parser_version
         dictout['task_index'] = task_index
