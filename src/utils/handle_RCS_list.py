@@ -3,6 +3,7 @@ import pandas as pd
 def main(RCS=''):
     msg = 'no issue'
     status = False
+    dict_={}
     outputrcs_list = []
     if isinstance(RCS, list):
         #print('list')
