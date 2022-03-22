@@ -48,7 +48,7 @@ RCS_splited_lists = rcs_spliter(DF['RCS'].unique().tolist(), 500)
 for rcslist in RCS_splited_lists:
     # 6 - download new pdf not yet downloaded
     print('----Downloading pdfs---')
-    pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf) #always consider only new "depot"
+    #pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf) #always consider only new "depot"
     print('----pdfs Downloaded ---')
     print('----parsing publi---')
     publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)

@@ -23,7 +23,18 @@ Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 
 #find all the SCSP companies from RCS parsed
-RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
+#RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
+
+# added for Zarb mizi
+DF = Mongorcsp.find({'Siège social':{ '$regex' : '.*' + 'Raiffeisen' + '.*'}})
+
+DF=DF[DF['Siège social'].str.contains('15', case=False, regex=True)].reset_index(drop=True)
+DF=DF[DF['Siège social'].str.contains('2411', case=False, regex=True)].reset_index(drop=True)
+
+RCSlist = DF['RCS'].to_list()
+### end zarb
+
+
 print(len(RCSlist))
 
 
@@ -62,8 +73,14 @@ except:
     RCS_output[['czip', 'city', 'address1']] = RCS_output['address_tbd'].apply(pd.Series)
     RCS_output['country'] = "Luxembourg"
     RCS_output['changed RCS number'] = RCS_list_DF['changed_RCS_number']
-    RCS_output['Replaced by'] = RCS_list_DF['Replaced by']
-    RCS_output['old RCS number'] = RCS_list_DF['old RCS']
+    try:
+        RCS_output['Replaced by'] = RCS_list_DF['Replaced by']
+    except:
+        pass
+    try:
+        RCS_output['old RCS number'] = RCS_list_DF['old RCS']
+    except:
+        pass
 
     RCS_output['Dénonciation du contrat de domiciliation'] = RCS_list_DF['Dénonciation du contrat de domiciliation']
 
@@ -140,7 +157,7 @@ except:
     timer_main = performance_timer()
 
     # find all the SCSP companies from RCS parsed
-    RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique": {'$regex': '.*' + 'commandite spéciale' + '.*'}})
+    #RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique": {'$regex': '.*' + 'commandite spéciale' + '.*'}})
     print(len(RCSlist))
 
     LBR_RCS_file_DF = Mongopubli.find_from_RCSlist(RCS=RCSlist)
