@@ -7,6 +7,7 @@ from src.pdf_parsers.publications.main import main as publi_parser
 from src.utils.RCS_spliter import main as rcs_spliter
 
 from src.utils_merger import *
+from collections import ChainMap
 
 
 from .utils.timer import performance_timer
@@ -21,6 +22,7 @@ Mongorbep = mongo(ip='146.59.152.231', db='LBR_test', col='RBE_parsed')
 Mongoresa = mongo(ip='146.59.152.231', db='LBR_test', col='RESA_parsed')
 Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
+Mongobilan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
 #find all the SCSP companies from RCS parsed
 #RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
@@ -39,7 +41,6 @@ print(len(RCSlist))
 
 
 try:
-    1/0
     RCS_output = pd.read_pickle('rcs_file.pkl')
 except:
     #search by rcs number of SCSP companies from RCS parsed
@@ -92,7 +93,6 @@ except:
 #RBE
 
 try:
-    1/0
     RBE_output = pd.read_pickle('rbe_file.pkl')
 except:
     #search by rcs number of SCSP companies from RCS parsed
@@ -149,7 +149,6 @@ FILE_LABEL_LIST = ['Modification',
 
 # Admin and asso
 try:
-    1/0
     immat_df = pd.read_pickle('adm_file.pkl')
 
 except:
@@ -202,15 +201,64 @@ except:
     immat_df.to_pickle('adm_file.pkl')
     print(f"ADM/ASSO done, timer : {str(timer_main.stop())}s")
 
+try:
+    1 / 0
+    bilan_DF_new = pd.read_pickle('financials.pkl')
+
+except:
+    Bilan_list_DF = Mongobilan.find_from_RCSlist(RCS=RCSlist)
+    for name in Bilan_list_DF.columns:
+        print(name)
+
+    Bilan_list_DF = Bilan_list_DF.rename(columns={'depot': 'source'})
+    Bilan_list_DF = Bilan_list_DF.rename(columns=dict_trad)
+
+
+    collist = ['total_assets_liabilities', 'equity', 'result', 'debts',
+               'capital', 'fixed_asset', 'revenues', 'margin',
+               'liabilities', 'net_profitability_rate', 'return_on_equity', 'current_ratio',
+               'working_capital', 'non_financials_debts', 'ebitda', 'gross_result',
+               'finance_charges', 'financial_products', 'amortization_and_provisions',
+               'longterm_debts', 'gross_operating_income', 'taxes', 'non_financials_assets',
+               'result', 'working_capital_requirement', 'longterm_receivables', 'debt_to_equity']
+
+    collist = collist + ['RCS', 'correction', 'source', 'year']
+
+    collist = [col for col in collist if col in Bilan_list_DF.columns]
+
+
+    Bilan_list_DF = Bilan_list_DF[collist]
+    Bilan_list_DF = Bilan_list_DF[Bilan_list_DF.year != False].sort_values(by=['RCS', 'year', 'correction'],
+                                                                        ascending=True).reset_index(drop=True)
+
+    bilan_DF_new = Bilan_list_DF.groupby(['RCS']).agg('last').reset_index()
+    '''
+    bilan_DF_new.sample(100).to_excel('tbd1.xlsx')
+
+    bilan_DF_new['lastbilan'] = bilan_DF_new[collist + ['source', 'year']].fillna("").to_dict(orient='records')
+
+    bilan_DF_new=bilan_DF_new[['RCS', 'lastbilan']]
+    '''
+
+    print(f"financials processed, timer : {str(timer_main.stop())}s")
+    print('saving')
+    bilan_DF_new.to_excel('financials.xlsx', index=False)
+    bilan_DF_new.to_csv('financials.csv', index=False, sep=';')
+    print(f"financials saved, timer : {str(timer_main.stop())}s")
+
+
+
 
 print('Merging RBE')
 RCS_output = pd.merge(RCS_output, RBE_output, how='left', on='RCS')
 print('Merging ADM')
 RCS_output = pd.merge(RCS_output, immat_df, how='left', on='RCS')
+print('Merging financials')
+RCS_output = pd.merge(RCS_output, bilan_DF_new, how='left', on='RCS')
 
 RCS_output=RCS_output[RCS_output['IsActive']].reset_index(drop=True)
 
-RCS_output.to_excel('full_file.xlsx', index=False)
+RCS_output.to_excel('full_file_.xlsx', index=False)
 print(f"adm Merged, timer : {str(timer_main.stop())}s")
 
 

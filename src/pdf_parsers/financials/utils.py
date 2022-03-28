@@ -85,6 +85,8 @@ def regex_loop(text):
 
 
 def fonction_cafe(dico):
+    #print('*****')
+    #print(dico)
     calculus_sheet = {}
     if dico['type bilan'] == 'abrege':
         if dico['type compte resultat'] == 'abrege':
@@ -103,6 +105,7 @@ def fonction_cafe(dico):
     result = {}
     for key, value in calculus_sheet.items():
         clean_value = value.replace(' ', '')
+
         if key == 'passif_circulant':
             if '405' in dico:
                 if '301' in dico:
@@ -175,12 +178,23 @@ def fonction_cafe(dico):
 
             for key_ in result.keys():
                 if isinstance(result[key_], float):
-                    result[key_] = round(result[key_], 2)
+                    result[key_] = round(result[key_], 3) #arrondi à 3 25/03/2022
 
             # added ticket 361
             if 'captiaux_propres' in result:
                 if result['captiaux_propres'] != 0:
                     if 'dettes' in result:
-                        result['ratio_endettement'] = result['dettes'] / result['captiaux_propres']
+                        result['ratio_endettement'] = round(result['dettes'] / result['captiaux_propres'], 3) #arrondi à 3 25/03/2022
+
+            if key == 'marge_net':
+                if all(val in dico for val in ('669', '701')):
+                    if dico['701']!=0:
+                        result[key] = round((dico['669'] / dico['701']) * 100, 1) #arrondi à 1 25/03/2022
+        elif clean_value in dico.keys():
+            result[key] = dico[clean_value]
+
+
+    #print(result)
+    #print('------')
 
     return result

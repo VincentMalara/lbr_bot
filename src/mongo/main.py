@@ -30,6 +30,9 @@ class mongo():
         if dictin is None:
             dictin = {}
         if dictout == {}: #will return complete collection
+            print('****')
+            print(dictin)
+            print(self.collection.find(dictin))
             df_found = pd.DataFrame(list(self.collection.find(dictin)))
         else:
             df_found = pd.DataFrame(list(self.collection.find(dictin, dictout))) #in case you need only few columns
@@ -195,7 +198,16 @@ class mongo():
         self.set_status(newstatus='to_be_updated', RCS=RCS, dictin=dictin)
 
     def drop_duplicates(self, colsel=None, coldup=None, seldict={}):
-        DF = self.find(seldict)
+
+        dictout = {'RCS': 1,'extraction_date':1,"task_index":1, '_id': 0}
+        if coldup is not None:
+            dict2 = {coldup: 1}
+            dictout = {**dictout, **dict2}
+        if colsel is not None:
+            dict2 = {colsel: 1}
+            dictout = {**dictout, **dict2}
+
+        DF = self.find(dictin=seldict, dictout=dictout)
         if DF.shape[0] > 0:
             if "task_index" in DF.columns:
                 if colsel is None:
@@ -221,7 +233,7 @@ class mongo():
                             duplicated_list = duplicated[coldup].to_list()
                             DF = self.find_from_RCSlist(duplicated_list)
                             if "task_index" in DF.columns:
-                                DF = DF.sort_values(by="task_index", ascending=True).reset_index(drop=True)
+                                DF = DF.sort_values(by=colsel, ascending=True).reset_index(drop=True)
                             self.delete(data=duplicated_list, RCS=True)
                             self.insert(DF.drop_duplicates(subset=[coldup], keep='last'))
 

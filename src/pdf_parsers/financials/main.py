@@ -6,7 +6,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
     task_index = mongoparsed.get_index_max() + 1
     dict_ = {'Type_de_depot': {'$regex': "Comptes annuels .eCDF"}}
     if RCS is not None:
-        list_, dict_rcs = rcs_input_checker(RCS=RCS, fct_name='financials.parser')
+        list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS) #, fct_name='financials.parser')
         dict_ = {**dict_, **dict_rcs}
 
     RCSDF = mongo.find(dict_)

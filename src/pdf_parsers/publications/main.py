@@ -23,7 +23,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
                 RCSDF = mongo.find(dict_)
     else: #--> reparse all in ths case
         print("All publi will be reparsed")
-        #mongoparsed.delete()
+        mongoparsed.delete()
         task_index = -1
 
     if RCSDF.shape[0] > 0:

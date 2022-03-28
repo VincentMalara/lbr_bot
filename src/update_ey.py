@@ -40,9 +40,13 @@ print(pd.DataFrame(DF['extraction_date'].value_counts()).sort_index())
 
 
 
+RCSlist = DF['RCS'].unique().tolist()
 
-RCS_splited_lists = rcs_spliter(DF['RCS'].unique().tolist(), 500)
+print('----parsing bilans---')
+financials_parser(RCS=RCSlist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
+print('----bilans parsed ---')
 
+1/0
 #RCS_splited_lists = ["B168088", "B174897", "B187247", "B196099" ]
 
 for rcslist in RCS_splited_lists:
@@ -54,7 +58,6 @@ for rcslist in RCS_splited_lists:
     publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
     print('----publi parsed ---')
 
-1/0
 
 
 print('----Parsing RCS---')
