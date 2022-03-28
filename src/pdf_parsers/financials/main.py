@@ -3,6 +3,7 @@ from src.pdf_parsers.financials.parser import main as parser
 
 
 def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
+    N=0
     task_index = mongoparsed.get_index_max() + 1
     dict_ = {'Type_de_depot': {'$regex': "Comptes annuels .eCDF"}}
     if RCS is not None:

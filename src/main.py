@@ -54,18 +54,24 @@ for rcslist in RCS_splited_lists:
     print('----Downloading pdfs---')
     pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
     print('----pdfs Downloaded ---')
-'''
+
 
 RCSlist = Mongorcs.get_RCSlist()
 RCS_splited_lists = rcs_spliter(RCSlist, 10000)
 
-
+'''
 for i, rcslist in enumerate(RCS_splited_lists):
-    print(f"{i} on {len(RCS_splited_lists)}")
-    print('----parsing publi---')
-    N = publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
-    print(f'----publi parsed : {N}---')
-    print('----parsing financials ---')
-    N = financials_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
-    print(f'----financials parsed : {N}---')
-    print(f"completed in {str(timer_main.stop())}s")
+    if i >5:
+        print(f"{i} on {len(RCS_splited_lists)}")
+        print('----parsing publi---')
+        N = publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
+        print(f'----publi parsed : {N}---')
+        print('----parsing financials ---')
+        N = financials_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
+        print(f'----financials parsed : {N}---')
+        print(f"completed in {str(timer_main.stop())}s")
+
+
+
+
+print(f"completed in {str(timer_main.stop())}s")
