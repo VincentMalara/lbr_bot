@@ -60,7 +60,7 @@ RCSlist = Mongorcs.get_RCSlist()
 RCS_splited_lists = rcs_spliter(RCSlist, 10000)
 
 for i, rcslist in enumerate(RCS_splited_lists):
-    if i >5:
+    if i >19:
         print(f"{i} on {len(RCS_splited_lists)}")
         print('----parsing publi---')
         N = publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)

@@ -112,8 +112,8 @@ FILE_LABEL_LIST = ['Modification',
 
 # Admin and asso
 try:
+    1/0
     immat_df = pd.read_pickle('adm_file.pkl')
-
 except:
     print(f"Build company history starting on: {datetime.now()}")
     timer_main = performance_timer()
@@ -166,7 +166,6 @@ except:
 
 try:
     bilan_DF_new = pd.read_pickle('financials.pkl')
-
 except:
     Bilan_list_DF = Mongofinan.find_from_RCSlist(RCS=RCSlist)
     for name in Bilan_list_DF.columns:
@@ -185,35 +184,47 @@ except:
                'result', 'working_capital_requirement', 'longterm_receivables', 'debt_to_equity']
 
     collist = collist + ['RCS', 'correction', 'source', 'year']
+    bilan_DF_new = Bilan_list_DF[collist].copy()
 
     print('step assemble dicts')
-    bilan_DF_new['metadata'] = bilan_DF_new[collist + ['source', 'year']].fillna("").to_dict(orient='records')
-    bilan_DF_new.drop(columns=collist + ['source'], inplace=True)
+    bilan_DF_new['metadata'] = bilan_DF_new[collist].fillna("").to_dict(orient='records')
 
     print(f"done in: {str(timer_main.stop())}s")
     print('format')
 
     bilan_DF_new['financials'] = bilan_DF_new['metadata'].apply(format_finan)
     bilan_DF_new.drop(columns=['metadata'], inplace=True)
+    print(bilan_DF_new)
+    print('---')
 
-    print(bilan_DF_new.head())
 
     print(f"done in: {str(timer_main.stop())}s")
     print('agg')
-    bilan_DF_new = bilan_DF_new.sort_values(by=['RCS', 'year', 'correction'], ascending=True).reset_index()
-    print(bilan_DF_new.head())
-    bilan_DF_new = bilan_DF_new.groupby(['RCS', 'year']).agg('last').reset_index()
-    print(bilan_DF_new.head())
 
-    bilan_DF_new.drop(columns=['correction', 'year', 'index'], inplace=True)
-    bilan_DF_new = bilan_DF_new.groupby('RCS').agg(sum).reset_index()
+
+    bilan_DF_new = bilan_DF_new[[ 'RCS', 'correction', 'year', 'financials']].sort_values(by=['RCS', 'year', 'correction'], ascending=True)
+    print(bilan_DF_new)
+    print('---')
+
+    bilan_DF_new = bilan_DF_new.groupby(['RCS', 'year']).agg('last').reset_index()
+    print(bilan_DF_new)
+    print('---')
+
+    bilan_DF_new.drop(columns=['correction', 'year'], inplace=True)
+    print(bilan_DF_new)
+    print('---')
+
+    bilan_DF_new = bilan_DF_new[bilan_DF_new['financials'].apply(lambda x: isinstance(x, list))]
+
+    bilan_DF_new = bilan_DF_new.groupby('RCS').agg({'financials':sum}).reset_index()
     print(bilan_DF_new.shape)
     print(bilan_DF_new.head())
+
 
     print(f"financials processed, timer : {str(timer_main.stop())}s")
     print('saving')
     bilan_DF_new.to_excel('financials.xlsx', index=False)
-    bilan_DF_new.to_csv('financials.csv', index=False, sep=';')
+    bilan_DF_new.to_pickle('financials.pkl')
     print(f"financials saved, timer : {str(timer_main.stop())}s")
 
 

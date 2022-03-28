@@ -79,7 +79,30 @@ def clean_list(x):
         y = 'empty'
     return y
 
+
 def build_hist(x):
+    y = pd.DataFrame()
+    for j in x:
+        if isinstance(j, list):
+            for i in j:
+                if isinstance(i, dict):
+                    if i['status'] in ['modifié', 'nouveau']:
+                        y = pd.concat([y, pd.DataFrame.from_records([i])])
+                    if i['status'] == 'rayé':
+                        if y.shape[0] > 0:
+                            y = y[y['name'] != i['name']].reset_index(drop=True)
+
+    if y.shape[0]>0:
+        #y.drop(columns=['status'], inplace=True)
+        y.drop_duplicates(subset='name', keep='last', inplace=True)
+        #y = y.to_dict('records')
+        y = y.to_dict(orient='records')
+    else:
+        y = ''
+    return y
+
+
+def build_hist_simple(x):
     y = pd.DataFrame()
     for j in x:
         if isinstance(j, list):
