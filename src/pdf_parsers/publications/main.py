@@ -5,6 +5,7 @@ from src.pdf_downloaders.utils import is_valid_publi
 
 
 def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
+    N=0
     task_index = mongoparsed.get_index_max() + 1
     dict_ = {}
     if RCS is not None:
@@ -23,16 +24,20 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
                 RCSDF = mongo.find(dict_)
     else: #--> reparse all in ths case
         print("All publi will be reparsed")
-        mongoparsed.delete()
+        mongoparsed.delete(dict_rcs)
         task_index = -1
 
     if RCSDF.shape[0] > 0:
-        print(RCSDF['Type_de_depot'].value_counts())
+        #print(RCSDF['Type_de_depot'].value_counts())
+        #print(task_index)
         RCSparsed = RCSDF.apply(lambda x: parser(x, task_index), axis=1).to_list()
         mongoparsed.insert(RCSparsed)
         mongoparsed.drop_duplicates(colsel='task_index', coldup='N_depot')
+        N = len(RCSparsed)
     else:
         print("error in pdf parser financials : empty dataframe")
+
+    return N
 
 
 if __name__ == '__main__':

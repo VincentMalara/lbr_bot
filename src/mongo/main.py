@@ -30,9 +30,6 @@ class mongo():
         if dictin is None:
             dictin = {}
         if dictout == {}: #will return complete collection
-            print('****')
-            print(dictin)
-            print(self.collection.find(dictin))
             df_found = pd.DataFrame(list(self.collection.find(dictin)))
         else:
             df_found = pd.DataFrame(list(self.collection.find(dictin, dictout))) #in case you need only few columns
@@ -100,7 +97,7 @@ class mongo():
                 if '_id' in data.columns:
                     data = data.drop(columns='_id')
                 if 'task_index' in data.columns:
-                    data['task_index'] = data['task_index'].apply(lambda x: int(x))
+                    data['task_index'] = data['task_index'].fillna(-1).astype(int)
                 dictout = clean_list_dict_nan(data.fillna('').to_dict('records'))
                 self.collection.insert_many(dictout)
             else:

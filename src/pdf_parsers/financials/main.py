@@ -20,15 +20,18 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
                 RCSDF = mongo.find(dict_)
     else: #--> reparse all in ths case
         print("All bilan will be reparsed")
-        mongoparsed.delete()
+        mongoparsed.delete(dict_rcs)
         task_index = -1
 
     if RCSDF.shape[0] > 0:
         RCSparsed = RCSDF.apply(lambda x: parser(x, task_index), axis=1).to_list()
         mongoparsed.insert(RCSparsed)
         mongoparsed.drop_duplicates(colsel='task_index', coldup='N_depot')
+        N = len(RCSparsed)
     else:
         print("error in pdf parser financials : empty dataframe")
+
+    return N
 
 
 if __name__ == '__main__':

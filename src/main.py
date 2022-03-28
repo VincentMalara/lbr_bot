@@ -25,7 +25,7 @@ Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
 
-
+'''
 #0 build RCS list
 DF = Mongorcs.find(dictin={}, dictout={'RCS': 1,'extraction_date':1, '_id': 0})
 DF['extraction_date'] = pd.to_datetime(DF['extraction_date'], format='%d/%m/%Y')
@@ -39,13 +39,12 @@ DF = DF[DF['extraction_date']>pd.to_datetime('01/12/2021', format='%d/%m/%Y')].r
 print(DF)
 RCSlist_rbe = list(DF['RCS'].unique())
 
-'''
+
 #1 - parse RCS
 rcs_parser(RCS=RCSlist_rcs,type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 
 #2 - parse RBE
 rcs_parser(RCS=RCSlist_rbe,type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
-'''
 
 
 
@@ -55,15 +54,18 @@ for rcslist in RCS_splited_lists:
     print('----Downloading pdfs---')
     pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
     print('----pdfs Downloaded ---')
-
+'''
 
 RCSlist = Mongorcs.get_RCSlist()
 RCS_splited_lists = rcs_spliter(RCSlist, 10000)
 
-for rcslist in RCS_splited_lists:
+
+for i, rcslist in enumerate(RCS_splited_lists):
+    print(f"{i} on {len(RCS_splited_lists)}")
     print('----parsing publi---')
-    publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
-    print('----publi parsed ---')
+    N = publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
+    print(f'----publi parsed : {N}---')
     print('----parsing financials ---')
-    financials_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
-    print('----financials parsed ---')
+    N = financials_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
+    print(f'----financials parsed : {N}---')
+    print(f"completed in {str(timer_main.stop())}s")
