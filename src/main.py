@@ -54,12 +54,11 @@ for rcslist in RCS_splited_lists:
     print('----Downloading pdfs---')
     pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
     print('----pdfs Downloaded ---')
-
+'''
 
 RCSlist = Mongorcs.get_RCSlist()
 RCS_splited_lists = rcs_spliter(RCSlist, 10000)
 
-'''
 for i, rcslist in enumerate(RCS_splited_lists):
     if i >5:
         print(f"{i} on {len(RCS_splited_lists)}")
