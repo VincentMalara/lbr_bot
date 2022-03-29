@@ -21,7 +21,7 @@ Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
-RCSlist = Mongorcs.get_RCSlist() #[0:100000]
+RCSlist = Mongorcs.get_RCSlist()
 
 try:
     RCS_output = pd.read_pickle('rcs_file.pkl')
@@ -54,6 +54,7 @@ except:
 
     RCS_output['address_tbd'] = RCS_list_DF['Siège social'].apply(manage_adress2)
     RCS_output[['czip', 'city', 'address1']] = RCS_output['address_tbd'].apply(pd.Series)
+    RCS_output.drop(columns=['address_tbd'], inplace=True)
     RCS_output['country'] = "Luxembourg"
 
     RCS_output['changed RCS number'] = RCS_list_DF['changed_RCS_number']
@@ -69,7 +70,7 @@ except:
     RCS_output['Dénonciation du contrat de domiciliation'] = RCS_list_DF['Dénonciation du contrat de domiciliation']
 
     RCS_output['is not Lux'] = RCS_output['name'].apply(is_succur)
-    RCS_output['to be del'] = findtobedel(RCS_output)
+    RCS_output['to be del'] = RCS_output.apply(findtobedel, axis=1)
 
     RCS_output.to_excel('rcs_file.xlsx', index=False)
     RCS_output.to_pickle('rcs_file.pkl')
@@ -91,14 +92,13 @@ except:
 
     RBE_output['not registrated BO'] = RBE_list_DF['status'].apply(is_not_reg)
 
-    RBE_output['UBO'] = RBE_output['UBO'].apply(cleanubo)
+    #RBE_output['UBO'] = RBE_output['UBO'].apply(cleanubo)
 
     print(f"RBE processed, timer : {str(timer_main.stop())}s")
     print('saving')
     RBE_output.to_excel('rbe_file.xlsx', index=False)
     RBE_output.to_pickle('rbe_file.pkl')
     print(f"RBE merged, timer : {str(timer_main.stop())}s")
-
 
 
 FILE_LABEL_LIST = ['Modification',
@@ -248,10 +248,13 @@ except:
 
 print('Merging RBE')
 RCS_output = pd.merge(RCS_output, RBE_output, how='left', on='RCS')
+del RBE_output
 print('Merging ADM')
 RCS_output = pd.merge(RCS_output, immat_df, how='left', on='RCS')
+del immat_df
 print('Merging financials')
 RCS_output = pd.merge(RCS_output, bilan_DF_new, how='left', on='RCS')
+del bilan_DF_new
 
 
 RCS_output.to_excel('update_28032022.xlsx', index=False)

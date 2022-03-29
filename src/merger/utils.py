@@ -387,18 +387,15 @@ def clean_sarl(x):
     return y
 
 
-def findtobedel(DF):
-    output=[]
-    for index, row in DF.iterrows():
-        y = False
-        if 'is not Lux' in row.keys():
-            if row['is not Lux']:
-                y = True
-        if 'changed_RCS_number' in row.keys():
-            if row['changed_RCS_number'] != "old_one":
-                y = True
-        output.append(y)
-    return output
+def findtobedel(row):
+    y = False
+    if 'is not Lux' in row.keys():
+        if row['is not Lux']:
+            y = True
+    if 'changed RCS number' in row.keys():
+        if row['changed RCS number'] == "old_one":
+            y = True
+    return y
 
 
 def replaced_RCS(x):
@@ -501,6 +498,39 @@ def get_ubo(UBOs):
     if isinstance(UBOs, list):
         for ubo in UBOs:
             Dict_ = {}
+            j = ubo['Nom, Prénom(s)'].split(',')
+            fn = ' '.join([str(x).lower().capitalize() for x in j[1].split()])
+            ln = ' '.join([str(x).lower().capitalize() for x in j[0].split()])
+            Dict_['firstname'] = fn.strip()
+            Dict_['lastname'] = ln.strip()
+            Dict_['name'] = ' '.join([ln, fn])
+            if 'Nature des intérêts (Etendue)'in ubo.keys():
+                Dict_['interests'] = ubo['Nature des intérêts (Etendue)']
+            elif 'Fonction' in ubo.keys():
+                Dict_['title'] = ubo['Fonction']
+            elif 'Nationalité(s)' in ubo.keys():
+                Dict_['nationality'] = ubo['Nationalité(s)']
+            elif 'Pays de résidence' in ubo.keys():
+                Dict_['country'] = ubo['Pays de résidence']
+            elif 'Date et lieu de naissance' in ubo.keys():
+                birth = ubo['Date et lieu de naissance'].split('à')
+                if '/' in birth[0]:
+                    Dict_['birthdate'] = birth[0]
+                if '/' not in birth[1]:
+                    Dict_['birthplace'] = birth[1]
+            ubolist.append(Dict_)
+        if len(ubolist) == 0:
+            ubolist = ""
+    else:
+        ubolist = ""
+    return ubolist
+
+
+def get_ubo_old(UBOs):
+    ubolist = []
+    if isinstance(UBOs, list):
+        for ubo in UBOs:
+            Dict_ = {}
             j = ubo['Nom, Prénom(s)'].replace(',', ' ')
             k = j.split()
             k = [str(x).lower().capitalize() for x in k]
@@ -521,10 +551,7 @@ def get_ubo(UBOs):
     return ubolist
 
 
-
-
-
-def get_ubo_old(DF):
+def get_ubo_old1(DF):
     Outup_df = pd.DataFrame(columns=['RCS', 'UBO', 'Loi_2004'])
     for index, row in DF.iterrows():
         ubolist = []
