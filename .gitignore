@@ -51,5 +51,6 @@ Thumbs.db
 *.xlsx
 *.pdf
 *.csv
+*.pkl
 
 /temp/

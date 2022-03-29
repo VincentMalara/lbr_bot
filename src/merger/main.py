@@ -6,6 +6,7 @@ from configs import settings
 from src.merger.utils import *
 from src.utils.timer import performance_timer
 from src.mongo.main import mongo
+from src.utils.RCS_spliter import main as rcs_spliter
 
 
 timer_main = performance_timer()
@@ -20,7 +21,7 @@ Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
-RCSlist = Mongorcs.get_RCSlist()[0:100000]
+RCSlist = Mongorcs.get_RCSlist() #[0:100000]
 
 try:
     RCS_output = pd.read_pickle('rcs_file.pkl')
@@ -112,7 +113,6 @@ FILE_LABEL_LIST = ['Modification',
 
 # Admin and asso
 try:
-    1/0
     immat_df = pd.read_pickle('adm_file.pkl')
 except:
     print(f"Build company history starting on: {datetime.now()}")
@@ -122,10 +122,20 @@ except:
     #RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique": {'$regex': '.*' + 'commandite spéciale' + '.*'}})
     print(len(RCSlist))
 
-    LBR_RCS_file_DF = Mongopubli.find_from_RCSlist(RCS=RCSlist)
-    LBR_RCS_file_DF['Date'] = pd.to_datetime(LBR_RCS_file_DF['Date'], format='%d/%m/%Y')
-    LBR_RCS_file_DF.sort_values(by='Date', ascending=True, inplace=True)
+    RCS_splited_lists = rcs_spliter(RCSlist, 50000)
+    LBR_RCS_file_DF=pd.DataFrame()
 
+    for rcslist in RCS_splited_lists:
+        print('----')
+        print(len(rcslist))
+        LBR_RCS_file_DFnew = Mongopubli.find_from_RCSlist(RCS=rcslist)
+        if LBR_RCS_file_DFnew.shape[0]>0:
+            LBR_RCS_file_DFnew['Date'] = pd.to_datetime(LBR_RCS_file_DFnew['Date'], format='%d/%m/%Y')
+            LBR_RCS_file_DF = pd.concat([LBR_RCS_file_DF, LBR_RCS_file_DFnew])
+            print(LBR_RCS_file_DF.shape)
+
+
+    LBR_RCS_file_DF.sort_values(by='Date', ascending=True, inplace=True)
     immat_df = LBR_RCS_file_DF.fillna('').groupby('RCS').agg(list)
 
     print(immat_df)
@@ -167,9 +177,16 @@ except:
 try:
     bilan_DF_new = pd.read_pickle('financials.pkl')
 except:
-    Bilan_list_DF = Mongofinan.find_from_RCSlist(RCS=RCSlist)
-    for name in Bilan_list_DF.columns:
-        print(name)
+    RCS_splited_lists = rcs_spliter(RCSlist, 50000)
+    Bilan_list_DF = pd.DataFrame()
+    for rcslist in RCS_splited_lists:
+        print('----')
+        print(len(rcslist))
+        Bilan_list_DF_new = Mongofinan.find_from_RCSlist(RCS=rcslist)
+        if Bilan_list_DF_new.shape[0] > 0:
+            Bilan_list_DF = pd.concat([Bilan_list_DF, Bilan_list_DF_new])
+            print(Bilan_list_DF.shape)
+
 
     Bilan_list_DF = Bilan_list_DF.rename(columns={'depot': 'source'})
     Bilan_list_DF = Bilan_list_DF.rename(columns=dict_trad)
