@@ -79,6 +79,7 @@ except:
 #RBE
 
 try:
+    1/0
     RBE_output = pd.read_pickle('rbe_file.pkl')
 except:
 
@@ -255,6 +256,17 @@ del immat_df
 print('Merging financials')
 RCS_output = pd.merge(RCS_output, bilan_DF_new, how='left', on='RCS')
 del bilan_DF_new
+
+def cleanjusqua(x):
+    if x!='':
+        x = str(x)
+        x = x.replace("jusqu'à", "jusqu à")
+        x = eval(x)
+    return x
+
+RCS_output['Gérant/Administrateur'] = RCS_output['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
+RCS_output['Délégué à la gestion journalière'] = RCS_output['Délégué à la gestion journalière'].fillna('').apply(cleanjusqua)
+RCS_output['Personne(s) chargée(s) du contrôle des comptes'] = RCS_output['Personne(s) chargée(s) du contrôle des comptes'].fillna('').apply(cleanjusqua)
 
 
 RCS_output.to_excel('update_28032022.xlsx', index=False)

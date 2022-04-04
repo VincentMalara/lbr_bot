@@ -15,8 +15,8 @@ from urllib.request import urlopen
 import xmltodict
 
 
-Mongo = mongo(col=settings.col_RESA)
-Mongo_parsed = mongo(col=settings.col_RESAp)
+Mongoresa = mongo(ip='146.59.152.231', db='LBR_test', col='RESA')
+Mongoresaparsed = mongo(ip='146.59.152.231', db='LBR_test', col='RESA_parsed')
 
 #Mongo.delete()
 #Mongo_parsed.delete()
@@ -24,7 +24,7 @@ Mongo_parsed = mongo(col=settings.col_RESAp)
 n=0
 test = False
 while not test and n<5:
-    scraper = Resa(mongoRESA=Mongo, mongoRESAparsed=Mongo_parsed)
+    scraper = Resa(mongoRESA=Mongoresa, mongoRESAparsed=Mongoresaparsed)
     scraper.launch()
     test = scraper.status
     print('---------')
@@ -33,6 +33,8 @@ while not test and n<5:
 
 monthlist = [ 'Juillet-2021', 'Août-2021', 'Septembre-2021', 'Octobre-2021', 'Novembre-2021', 'Décembre-2021',
                     'Janvier-2022', 'Février-2022']
+
+monthlist=['Mars-2022']
 
 for monthyear in monthlist:
     month = monthyear.split('-')[0]

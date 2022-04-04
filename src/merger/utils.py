@@ -506,13 +506,13 @@ def get_ubo(UBOs):
             Dict_['name'] = ' '.join([ln, fn])
             if 'Nature des intérêts (Etendue)'in ubo.keys():
                 Dict_['interests'] = ubo['Nature des intérêts (Etendue)']
-            elif 'Fonction' in ubo.keys():
+            if 'Fonction' in ubo.keys():
                 Dict_['title'] = ubo['Fonction']
-            elif 'Nationalité(s)' in ubo.keys():
+            if 'Nationalité(s)' in ubo.keys():
                 Dict_['nationality'] = ubo['Nationalité(s)']
-            elif 'Pays de résidence' in ubo.keys():
+            if 'Pays de résidence' in ubo.keys():
                 Dict_['country'] = ubo['Pays de résidence']
-            elif 'Date et lieu de naissance' in ubo.keys():
+            if 'Date et lieu de naissance' in ubo.keys():
                 birth = ubo['Date et lieu de naissance'].split('à')
                 if '/' in birth[0]:
                     Dict_['birthdate'] = birth[0]
