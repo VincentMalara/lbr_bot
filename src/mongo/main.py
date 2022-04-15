@@ -103,7 +103,7 @@ class mongo():
             else:
                 print('error at mongo.insert : input DF is empty')
         elif isinstance(data, dict):
-            self.collection.insert(data)
+            self.collection.insert_one(data)
         else:
             print('error at mongo.insert : not accepted input format. DF, list or dict accepted')
             status = False

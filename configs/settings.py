@@ -8,7 +8,7 @@ if os.name == 'nt':
     NMAX = 10000
 else:
     executablepath = 'geckodriver'
-    mongo_ip = '146.59.152.231'
+    mongo_ip = 'localhost' #'146.59.152.231'
     headless = True
     NMAX = 10000
 

@@ -24,81 +24,9 @@ Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongorcsp = mongo(ip='146.59.152.231', db='LBR_test', col='RCS_parsed')
 
 
-
-RCSlist = ['A39456', 'B100006', 'B100007', 'B100008', 'B100009', 'B106338', 'B120246', 'B1202461', 'B120247', 'B120248',
-           'B14674', 'B14710', 'B14815', 'B15268', 'B15425', 'B15467', 'B15489', 'B15490', 'B15491', 'B15492', 'B15590',
-           'B15846', 'B15904', 'B16286', 'B16336', 'B16468', 'B16607', 'B16677', 'B16768', 'B16844', 'B16854', 'B16855',
-           'B16923', 'B16924', 'B17015', 'B17016', 'B17020', 'B17218', 'B17286', 'B17298', 'B17479', 'B182934', 'B215643',
-           'B221018', 'B221019', 'B248373', 'B249879', 'B255380', 'B262114', 'B39099', 'B56047', 'E1879', 'E2226', 'E229',
-           'E2818', 'E4589', 'E4738', 'E5555', 'E7052', 'E7905', 'E831','B256373']
-
-RCSlist = ['B16468','B182934', 'B215643','B221018', 'B221019', 'B248373']
-
-
-RCSlist = [
-    'A28576',
-    'A31099',
-    'B37592',
-    'B107798',
-    'B177788',
-    'B33950',
-    'B200011',
-    'B244342',
-    'B243280',
-    'B13038',
-    'B19760',
-    'B13089'
-]
-
-RCSlist = ['B212831', 'B214530']
-
-
-RCSlist = [
-    'B16153',
-    'B110797',
-    'B105296',
-    'B110291',
-    'B102685',
-    'F462',
-    'B252738',
-    'B252738',
-    'B51793',
-    'E2234',
-    'A24829',
-    'A23114',
-    'B233468',
-    'B169659',
-    'B125213',
-    'E876',
-    'B239090',
-    'B78425',
-    'B127516',
-    'E6078',
-    'B239418',
-    'B233398',
-    'B161376',
-    'B197884',
-    'B136657',
-    'F10989',
-    'B128558',
-    'B64459',
-    'B166604',
-    'E6355',
-    'J135',
-    'F9894',
-    'B102924',
-    'B102930',
-    'B253196',
-    'B163690',
-    'F907'
-    ]
-
-
-
-
 timer_main = performance_timer()
 
-LBR_RCS_file_DF=pd.DataFrame()
+LBR_RCS_file_DF = pd.DataFrame()
 
 RCSlist = Mongorcsp.get_RCSlist()
 RCS_splited_lists = rcs_spliter(RCSlist, 10000)
@@ -108,9 +36,9 @@ for i, rcslist in enumerate(RCS_splited_lists):
     N = publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
     print(f'----financials parsed : {N}---')
     print(f"completed in {str(timer_main.stop())}s")
-    break
+    #break
 
-RCSlist = rcslist
+#RCSlist = rcslist
 
 LBR_RCS_file_DFnew = Mongopubli.find_from_RCSlist(RCS=RCSlist)
 if LBR_RCS_file_DFnew.shape[0]>0:
@@ -153,10 +81,23 @@ for label_ in labelisttoclean:
 
 
 immat_df = immat_df[list_col].reset_index()
-print('saving')
-immat_df.to_excel('adm_file_.xlsx', index=False)
-print(f"ADM/ASSO done, timer : {str(timer_main.stop())}s")
 
+
+def cleanjusqua(x):
+    if x!='':
+        x = str(x)
+        x = x.replace("jusqu'à", "jusqu à")
+        x = eval(x)
+    return x
+
+immat_df['Gérant/Administrateur'] = immat_df['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
+immat_df['Délégué à la gestion journalière'] = immat_df['Délégué à la gestion journalière'].fillna('').apply(cleanjusqua)
+immat_df['Personne(s) chargée(s) du contrôle des comptes'] = immat_df['Personne(s) chargée(s) du contrôle des comptes'].fillna('').apply(cleanjusqua)
+
+
+immat_df.to_excel('update_15042022.xlsx', index=False)
+immat_df.to_csv('update_15042022.csv', sep=';')
+print(f"completed in {str(timer_main.stop())}s")
 
 
 

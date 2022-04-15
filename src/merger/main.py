@@ -21,7 +21,17 @@ Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
-RCSlist = Mongorcs.get_RCSlist()
+RCSlist = Mongorcs.get_RCSlist({'task_index':42})
+
+RCS_list_DF = Mongorcsp.find_from_RCSlist(RCS=RCSlist)
+
+if 'old RCS' in RCS_list_DF.columns:
+    additonalRCS = list(set(RCS_list_DF[RCS_list_DF['old RCS'].notna()]['old RCS'].to_list()))
+    print(additonalRCS)
+    print(len(RCSlist))
+    RCSlist = RCSlist + additonalRCS
+    print(len(RCSlist))
+
 
 try:
     RCS_output = pd.read_pickle('rcs_file.pkl')
@@ -118,10 +128,6 @@ try:
 except:
     print(f"Build company history starting on: {datetime.now()}")
     timer_main = performance_timer()
-
-    # find all the SCSP companies from RCS parsed
-    #RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique": {'$regex': '.*' + 'commandite spéciale' + '.*'}})
-    print(len(RCSlist))
 
     RCS_splited_lists = rcs_spliter(RCSlist, 50000)
     LBR_RCS_file_DF=pd.DataFrame()

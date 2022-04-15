@@ -86,15 +86,25 @@ def build_hist(x):
         if isinstance(j, list):
             for i in j:
                 if isinstance(i, dict):
-                    if i['status'] in ['modifié', 'nouveau']:
+                    if i['status'] in ['nouveau']:
                         y = pd.concat([y, pd.DataFrame.from_records([i])])
+                    if i['status'] in ['modifié']:
+                        j = i.copy()
+                        if 'date' in j.keys():
+                            j['date'] = ''
+                        y = pd.concat([y, pd.DataFrame.from_records([j])])
                     if i['status'] == 'rayé':
                         if y.shape[0] > 0:
                             y = y[y['name'] != i['name']].reset_index(drop=True)
 
     if y.shape[0]>0:
         #y.drop(columns=['status'], inplace=True)
-        y.drop_duplicates(subset='name', keep='last', inplace=True)
+        #y.drop_duplicates(subset='name', keep='last', inplace=True)
+        dictagg = {key:'last' for key in y.columns if key not in ['name']}
+        if 'date' in y.columns:
+            dictagg['date'] = 'first'
+        y = y.groupby('name').agg(dictagg).reset_index()
+
         #y = y.to_dict('records')
         y = y.to_dict(orient='records')
     else:

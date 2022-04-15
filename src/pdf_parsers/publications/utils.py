@@ -184,7 +184,6 @@ def parse_splitted(dict_):
                 del dict_['Capital social / Fonds social']['Pourcentage, le cas échéant']
 
 
-
     if 'Dénomination ou raison sociale' in dict_.keys():
         if 'Le cas échéant, abréviation utilisée' in dict_['Dénomination ou raison sociale'].keys():
             if 'Page ' in dict_['Dénomination ou raison sociale']['Le cas échéant, abréviation utilisée']:
@@ -216,6 +215,10 @@ def get_personne(dict_):
     raye = DICT_PERSONNE_SPLITTERS['raye']
     modifie = DICT_PERSONNE_SPLITTERS['modifie']
     demission = DICT_PERSONNE_SPLITTERS['demission']
+    if 'Date' in dict_.keys():
+        date = dict_['Date']
+    else:
+        date = ''
 
     #print('---')
     #print(dict_['depot'])
@@ -267,13 +270,19 @@ def get_personne(dict_):
                             #print(aa)
                             if raye in i:
                                 #print("raye ", raye, ' : ', aa )
-                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'rayé','info':get_infos_from_pers(re_splitted[count:])})
+                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'rayé',
+                                                       'info': get_infos_from_pers(re_splitted[count:]),
+                                                       'date': date})
                             elif modifie in i:
                                 #print("modifie ", modifie, ' : ', aa )
-                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'modifié','info':get_infos_from_pers(re_splitted[count:])})
+                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'modifié',
+                                                       'info': get_infos_from_pers(re_splitted[count:]),
+                                                       'date': date})
                             elif demission in i:
                                 #print("demission ", demission, ' : ', aa )
-                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'démission','info':get_infos_from_pers(re_splitted[count:])})
+                                pers_dict_list.append({'name': aa.replace(',', '').strip(), 'status':'démission',
+                                                       'info': get_infos_from_pers(re_splitted[count:]),
+                                                       'date': date})
 
 
                         if nouvel_pers.lower() in previous.lower():
@@ -282,7 +291,9 @@ def get_personne(dict_):
                                 #print(new_.lower())
                                 #print(i.lower())
                                 if i.lower() == new_.lower():
-                                    pers_dict_list.append({'name': new_.replace(',', '').strip(), 'status':'nouveau','info':get_infos_from_pers(re_splitted[count:])})
+                                    pers_dict_list.append({'name': new_.replace(',', '').strip(), 'status': 'nouveau',
+                                                           'info': get_infos_from_pers(re_splitted[count:]),
+                                                           'date': date})
                                     new_list.remove(new_) #add new listed in new_list to pers_dict_list, by parsing its page
                                     #print(pers_dict_list)
                                     #print('ok')
@@ -387,6 +398,25 @@ def get_infos_from_pers(list_):
                     else:
                         if "jusqu'à l'assemblée générale qui se tiendra en l'année" in dictout['Durée du mandat'].keys():
                             del dictout['Durée du mandat']["jusqu'à l'assemblée générale qui se tiendra en l'année"]
+
+        # added to clean part social
+        regex_part = r'(1\s){1}'
+        regex_part2 = r'((\d+\s\d+)|(\d+))$'
+        if 'Parts sociales' in dictout.keys():
+            for label in dictout['Parts sociales'].keys():
+                if 'Nombre de parts détenues' in label:
+                    try:
+                        yy = re.sub(regex_part, '', dictout['Parts sociales'][label])
+                        yy = re.search(regex_part2, yy)
+                        yy = yy.group().replace(' ', '')
+                        if yy.isnumeric():
+                            del dictout['Parts sociales']
+                            dictout['Parts sociales'] = int(yy)
+                    except Exception as e:
+                        print(e)
+                        print(dictout['Parts sociales'][label])
+
+
         #----------------------------
     #print(dictout)
     return dictout

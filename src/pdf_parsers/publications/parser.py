@@ -22,10 +22,12 @@ def main(row, task_index=-1):
 
         dictout['depot'] = row['depot']
         dictout['Detail'] = row['Detail']
+        dictout['Date'] = row['Date']
+
         if test:
             dictout = split_and_parse(dictout)
 
-        for key in ['RCS', 'N_depot','Type_de_depot', 'Date']: #'extraction_date',
+        for key in ['RCS', 'N_depot','Type_de_depot']: #'extraction_date',
             dictout[key] = row[key]
 
         dictout['task_index'] = task_index
