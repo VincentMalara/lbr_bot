@@ -7,7 +7,7 @@ from src.pdf_parsers.publications.main import main as publi_parser
 from src.utils.RCS_spliter import main as rcs_spliter
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
 import pandas as pd

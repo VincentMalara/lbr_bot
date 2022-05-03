@@ -1,6 +1,5 @@
 import sys
 
-import pandas as pd
 
 from configs import settings
 from src.utils.handle_RCS_list import main as rcs_input_checker
@@ -9,8 +8,12 @@ from src.utils.handle_RCS_list import main as rcs_input_checker
 def main(type_='RCS', rcs=None, mongo=None, to_be_updated=False): #if to_be_updated, RCS has to be empty
     if type_ == 'RCS':
         from src.scrapers.rcs.scraper import Rcs as Scraper
+        print('run in RCS mode')
     elif type_ == 'RBE':
         from src.scrapers.rbe.scraper import Rbe as Scraper
+        print('run in RBE mode')
+    elif type_ == 'resa':
+        print('run in resa mode')
     else:
         print(f"{type_} is not known, for scraper type")
         sys.exit()

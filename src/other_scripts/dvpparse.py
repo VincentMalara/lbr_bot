@@ -5,7 +5,7 @@ from src.html_parsers.rcs.main import main as rcs_parser
 from src.html_parsers.rbe.main import main as rbe_parser
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 
 from src.mongo.main import mongo
 from src.mongo.utils import insert_empty_RCS

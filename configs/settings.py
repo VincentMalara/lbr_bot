@@ -3,8 +3,8 @@ import os
 
 if os.name == 'nt':
     executablepath = 'geckodriver.exe'
-    mongo_ip = 'localhost'
-    headless = True #False
+    mongo_ip = 'localhost' #'146.59.152.231'
+    headless = False
     NMAX = 10000
 else:
     executablepath = 'geckodriver'

@@ -12,7 +12,7 @@ from src.pdf_parsers.publications.main import main as publi_parser
 
 timer_main = performance_timer()
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
 import pandas as pd

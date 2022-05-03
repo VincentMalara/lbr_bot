@@ -3,7 +3,7 @@ from src.pdf_downloaders.get_new_pdfs import main as dl_pdfs
 from src.pdf_downloaders.get_new_pdfs import clean_temp
 
 from src.mongo.main import mongo
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 
 timer_main = performance_timer()
 clean_temp()

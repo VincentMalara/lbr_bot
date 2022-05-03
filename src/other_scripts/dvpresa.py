@@ -4,7 +4,7 @@ from src.scrapers.resa.utils import Resa
 from src.utils.task_index import main as task_index
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 
 from src.mongo.main import mongo
 

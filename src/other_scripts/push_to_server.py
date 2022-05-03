@@ -1,4 +1,4 @@
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 import pandas as pd
 

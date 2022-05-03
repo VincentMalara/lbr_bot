@@ -1,4 +1,4 @@
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 import pandas as pd
 
@@ -9,7 +9,7 @@ Mongo_allpdfs = mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 
 Mongorcs = mongo(ip='146.59.152.231', db='LBR_test', col='RCS')
 
-Mongorcs.set_to_be_updated(dictin={'extraction_date':'10/03/2022', 'task_index'=-1})
+#Mongorcs.set_to_be_updated(dictin={'extraction_date':'10/03/2022', 'task_index'=-1})
 
 
 Mongo_old_bilan_DF = Mongo_old_bilan.find(dictin={}, dictout={'N_depot': 1, '_id': 0})

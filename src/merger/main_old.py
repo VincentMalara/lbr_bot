@@ -1,49 +1,41 @@
-from configs import settings
-from src.scrapers.main import main as scraper
-from src.html_parsers.main import main as rcs_parser
-from src.pdf_downloaders.main import main as pdf_downloader
-from src.pdf_parsers.financials.main import main as financials_parser
-from src.pdf_parsers.publications.main import main as publi_parser
-from src.utils.RCS_spliter import main as rcs_spliter
-
-from src.utils_merger import *
 from collections import ChainMap
-
-
-from .utils.timer import performance_timer
-from src.mongo.main import mongo
 
 import pandas as pd
 
+from configs import settings
+from src.merger.utils import *
+from src.utils.timer import performance_timer
+from src.mongo.main import mongo
+from src.utils.RCS_spliter import main as rcs_spliter
+
+
 timer_main = performance_timer()
 
+
+Mongorcs = mongo(ip='146.59.152.231', db='LBR_test', col='RCS')
+Mongorbe = mongo(ip='146.59.152.231', db='LBR_test', col='RBE')
 Mongorcsp = mongo(ip='146.59.152.231', db='LBR_test', col='RCS_parsed')
 Mongorbep = mongo(ip='146.59.152.231', db='LBR_test', col='RBE_parsed')
 Mongoresa = mongo(ip='146.59.152.231', db='LBR_test', col='RESA_parsed')
 Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
-Mongobilan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
+Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
-#find all the SCSP companies from RCS parsed
-#RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
+RCSlist = Mongorcs.get_RCSlist({'task_index':42})
 
-# added for Zarb mizi
-DF = Mongorcsp.find({'Siège social':{ '$regex' : '.*' + 'Raiffeisen' + '.*'}})
+RCS_list_DF = Mongorcsp.find_from_RCSlist(RCS=RCSlist)
 
-DF=DF[DF['Siège social'].str.contains('15', case=False, regex=True)].reset_index(drop=True)
-DF=DF[DF['Siège social'].str.contains('2411', case=False, regex=True)].reset_index(drop=True)
-
-RCSlist = DF['RCS'].to_list()
-### end zarb
-
-
-print(len(RCSlist))
+if 'old RCS' in RCS_list_DF.columns:
+    additonalRCS = list(set(RCS_list_DF[RCS_list_DF['old RCS'].notna()]['old RCS'].to_list()))
+    print(additonalRCS)
+    print(len(RCSlist))
+    RCSlist = RCSlist + additonalRCS
+    print(len(RCSlist))
 
 
 try:
     RCS_output = pd.read_pickle('rcs_file.pkl')
 except:
-    #search by rcs number of SCSP companies from RCS parsed
     RCS_list_DF = Mongorcsp.find_from_RCSlist(RCS=RCSlist)
     print(RCS_list_DF.shape)
 
@@ -62,8 +54,8 @@ except:
     RCS_output['classification'] = RCS_list_DF['Code NACE (Information mise à jour mensuellement)'].apply(get_nace)
     RCS_output['legalStatus'] = RCS_list_DF['Forme juridique']
     RCS_output['importStatus'] = "CREATE"
-    #print('processing nb subsi')
-    #RCS_output['numberOfSubsidiaries'] = RCS_list_DF['succursales'].apply(get_nb_sub)
+    print('processing nb subsi')
+    RCS_output['numberOfSubsidiaries'] = RCS_list_DF['succursales'].apply(get_nb_sub)
     print('processing is active, is HQ')
     RCS_output['IsActive'] = RCS_list_DF['company status'].isnull()
     RCS_output['IsHQ'] = True
@@ -72,7 +64,9 @@ except:
 
     RCS_output['address_tbd'] = RCS_list_DF['Siège social'].apply(manage_adress2)
     RCS_output[['czip', 'city', 'address1']] = RCS_output['address_tbd'].apply(pd.Series)
+    RCS_output.drop(columns=['address_tbd'], inplace=True)
     RCS_output['country'] = "Luxembourg"
+
     RCS_output['changed RCS number'] = RCS_list_DF['changed_RCS_number']
     try:
         RCS_output['Replaced by'] = RCS_list_DF['Replaced by']
@@ -86,6 +80,8 @@ except:
     RCS_output['Dénonciation du contrat de domiciliation'] = RCS_list_DF['Dénonciation du contrat de domiciliation']
 
     RCS_output['is not Lux'] = RCS_output['name'].apply(is_succur)
+    RCS_output['to be del'] = RCS_output.apply(findtobedel, axis=1)
+
     RCS_output.to_excel('rcs_file.xlsx', index=False)
     RCS_output.to_pickle('rcs_file.pkl')
 
@@ -93,10 +89,9 @@ except:
 #RBE
 
 try:
+    1/0
     RBE_output = pd.read_pickle('rbe_file.pkl')
 except:
-    #search by rcs number of SCSP companies from RCS parsed
-
 
     RBE_list_DF = Mongorbep.find_from_RCSlist(RCS=RCSlist)
     print(RBE_list_DF.shape)
@@ -106,35 +101,15 @@ except:
     RBE_output['Loi_2004'] = RBE_list_DF['Loi_2004']
     RBE_output['UBO'] = RBE_list_DF['Benef Economiques'].apply(get_ubo)
 
-    def is_not_reg(x):
-        return x == "not_registrated_BO"
-
     RBE_output['not registrated BO'] = RBE_list_DF['status'].apply(is_not_reg)
 
-    def cleanubo(ubos):
-        output = []
-        if isinstance(ubos, list):
-            for ubo in ubos:
-                if 'name' in ubo.keys():
-                    name = ubo['name']
-                    if 'interests' in ubo.keys():
-                        interests = ubo['interests']
-                        name = name + ' (' + interests + ')'
-                    output.append(name)
-
-        return '; '.join(output)
-
-
-    RBE_output['UBO'] = RBE_output['UBO'].apply(cleanubo)
+    #RBE_output['UBO'] = RBE_output['UBO'].apply(cleanubo)
 
     print(f"RBE processed, timer : {str(timer_main.stop())}s")
     print('saving')
     RBE_output.to_excel('rbe_file.xlsx', index=False)
     RBE_output.to_pickle('rbe_file.pkl')
     print(f"RBE merged, timer : {str(timer_main.stop())}s")
-
-
-
 
 
 FILE_LABEL_LIST = ['Modification',
@@ -150,19 +125,24 @@ FILE_LABEL_LIST = ['Modification',
 # Admin and asso
 try:
     immat_df = pd.read_pickle('adm_file.pkl')
-
 except:
     print(f"Build company history starting on: {datetime.now()}")
     timer_main = performance_timer()
 
-    # find all the SCSP companies from RCS parsed
-    #RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique": {'$regex': '.*' + 'commandite spéciale' + '.*'}})
-    print(len(RCSlist))
+    RCS_splited_lists = rcs_spliter(RCSlist, 50000)
+    LBR_RCS_file_DF=pd.DataFrame()
 
-    LBR_RCS_file_DF = Mongopubli.find_from_RCSlist(RCS=RCSlist)
-    LBR_RCS_file_DF['Date'] = pd.to_datetime(LBR_RCS_file_DF['Date'], format='%d/%m/%Y')
+    for rcslist in RCS_splited_lists:
+        print('----')
+        print(len(rcslist))
+        LBR_RCS_file_DFnew = Mongopubli.find_from_RCSlist(RCS=rcslist)
+        if LBR_RCS_file_DFnew.shape[0]>0:
+            LBR_RCS_file_DFnew['Date'] = pd.to_datetime(LBR_RCS_file_DFnew['Date'], format='%d/%m/%Y')
+            LBR_RCS_file_DF = pd.concat([LBR_RCS_file_DF, LBR_RCS_file_DFnew])
+            print(LBR_RCS_file_DF.shape)
+
+
     LBR_RCS_file_DF.sort_values(by='Date', ascending=True, inplace=True)
-
     immat_df = LBR_RCS_file_DF.fillna('').groupby('RCS').agg(list)
 
     print(immat_df)
@@ -190,7 +170,7 @@ except:
     list_col = []
     for label_ in labelisttoclean:
         if label_ in immat_df.columns:
-            immat_df[label_+ '_base']  = immat_df[label_].apply(clean_list)
+            immat_df[label_+ '_base'] = immat_df[label_].apply(clean_list)
             immat_df[label_]= immat_df[label_+ '_base'].apply(build_hist)
             list_col.append(label_)
 
@@ -202,13 +182,18 @@ except:
     print(f"ADM/ASSO done, timer : {str(timer_main.stop())}s")
 
 try:
-    1 / 0
     bilan_DF_new = pd.read_pickle('financials.pkl')
-
 except:
-    Bilan_list_DF = Mongobilan.find_from_RCSlist(RCS=RCSlist)
-    for name in Bilan_list_DF.columns:
-        print(name)
+    RCS_splited_lists = rcs_spliter(RCSlist, 50000)
+    Bilan_list_DF = pd.DataFrame()
+    for rcslist in RCS_splited_lists:
+        print('----')
+        print(len(rcslist))
+        Bilan_list_DF_new = Mongofinan.find_from_RCSlist(RCS=rcslist)
+        if Bilan_list_DF_new.shape[0] > 0:
+            Bilan_list_DF = pd.concat([Bilan_list_DF, Bilan_list_DF_new])
+            print(Bilan_list_DF.shape)
+
 
     Bilan_list_DF = Bilan_list_DF.rename(columns={'depot': 'source'})
     Bilan_list_DF = Bilan_list_DF.rename(columns=dict_trad)
@@ -223,106 +208,78 @@ except:
                'result', 'working_capital_requirement', 'longterm_receivables', 'debt_to_equity']
 
     collist = collist + ['RCS', 'correction', 'source', 'year']
+    bilan_DF_new = Bilan_list_DF[collist].copy()
 
-    collist = [col for col in collist if col in Bilan_list_DF.columns]
+    print('step assemble dicts')
+    bilan_DF_new['metadata'] = bilan_DF_new[collist].fillna("").to_dict(orient='records')
+
+    print(f"done in: {str(timer_main.stop())}s")
+    print('format')
+
+    bilan_DF_new['financials'] = bilan_DF_new['metadata'].apply(format_finan)
+    bilan_DF_new.drop(columns=['metadata'], inplace=True)
+    print(bilan_DF_new)
+    print('---')
 
 
-    Bilan_list_DF = Bilan_list_DF[collist]
-    Bilan_list_DF = Bilan_list_DF[Bilan_list_DF.year != False].sort_values(by=['RCS', 'year', 'correction'],
-                                                                        ascending=True).reset_index(drop=True)
+    print(f"done in: {str(timer_main.stop())}s")
+    print('agg')
 
-    bilan_DF_new = Bilan_list_DF.groupby(['RCS']).agg('last').reset_index()
-    '''
-    bilan_DF_new.sample(100).to_excel('tbd1.xlsx')
 
-    bilan_DF_new['lastbilan'] = bilan_DF_new[collist + ['source', 'year']].fillna("").to_dict(orient='records')
+    bilan_DF_new = bilan_DF_new[[ 'RCS', 'correction', 'year', 'financials']].sort_values(by=['RCS', 'year', 'correction'], ascending=True)
+    print(bilan_DF_new)
+    print('---')
 
-    bilan_DF_new=bilan_DF_new[['RCS', 'lastbilan']]
-    '''
+    bilan_DF_new = bilan_DF_new.groupby(['RCS', 'year']).agg('last').reset_index()
+    print(bilan_DF_new)
+    print('---')
+
+    bilan_DF_new.drop(columns=['correction', 'year'], inplace=True)
+    print(bilan_DF_new)
+    print('---')
+
+    bilan_DF_new = bilan_DF_new[bilan_DF_new['financials'].apply(lambda x: isinstance(x, list))]
+
+    bilan_DF_new = bilan_DF_new.groupby('RCS').agg({'financials':sum}).reset_index()
+    print(bilan_DF_new.shape)
+    print(bilan_DF_new.head())
+
 
     print(f"financials processed, timer : {str(timer_main.stop())}s")
     print('saving')
     bilan_DF_new.to_excel('financials.xlsx', index=False)
-    bilan_DF_new.to_csv('financials.csv', index=False, sep=';')
+    bilan_DF_new.to_pickle('financials.pkl')
     print(f"financials saved, timer : {str(timer_main.stop())}s")
 
 
 
-
 print('Merging RBE')
 RCS_output = pd.merge(RCS_output, RBE_output, how='left', on='RCS')
+del RBE_output
 print('Merging ADM')
 RCS_output = pd.merge(RCS_output, immat_df, how='left', on='RCS')
+del immat_df
 print('Merging financials')
 RCS_output = pd.merge(RCS_output, bilan_DF_new, how='left', on='RCS')
+del bilan_DF_new
 
-RCS_output=RCS_output[RCS_output['IsActive']].reset_index(drop=True)
+def cleanjusqua(x):
+    if x!='':
+        x = str(x)
+        x = x.replace("jusqu'à", "jusqu à")
+        x = eval(x)
+    return x
 
-RCS_output.to_excel('full_file_.xlsx', index=False)
+RCS_output['Gérant/Administrateur'] = RCS_output['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
+RCS_output['Délégué à la gestion journalière'] = RCS_output['Délégué à la gestion journalière'].fillna('').apply(cleanjusqua)
+RCS_output['Personne(s) chargée(s) du contrôle des comptes'] = RCS_output['Personne(s) chargée(s) du contrôle des comptes'].fillna('').apply(cleanjusqua)
+
+
+RCS_output.to_excel('update_28032022.xlsx', index=False)
+RCS_output.to_csv('update_28032022.csv', sep=';')
+
 print(f"adm Merged, timer : {str(timer_main.stop())}s")
 
 
 
-
-
-
-
-'''
-    if ADMASSO_FROM_CSV:
-        print('Loading financials from CSV')
-        AdmAsso_DF_new = pd.read_csv(file_admasso + '.csv', sep=';')
-        print(f'Financials loaded from CSV, timer : {str(timer_main.stop())}s')
-    else:
-        CHECK_FILELIST = 'C:/Users/Utilisateur/PycharmProjects/LBR_collect_and_process/src/Data/check_filelist'
-        AdmAsso_DF = pd.read_pickle(CHECK_FILELIST + '_3.pkl')
-        print(AdmAsso_DF.shape)
-        print(f"LBR Adm Asso loaded, timer : {str(timer_main.stop())}s")
-        print('processing adm asso')
-        AdmAsso_DF_new = pd.DataFrame()
-        AdmAsso_DF_new['RCS'] = AdmAsso_DF['RCS']
-
-
-        def cleanratecompletaion(data):
-            output={}
-            if isinstance(data, dict):
-                for i in data.keys():
-                    dict_={}
-                    if data[i]['needed']>0:
-                        output[i + ' rating : feasible_ratio'] = round(data[i]['utilisé']/data[i]['needed'],2)
-
-                    if data[i]['needed_full'] > 0:
-                        output[i + ' rating : overall_ratio'] = round(data[i]['utilisé'] / data[i]['needed_full'],2)
-            return output
-
-        AdmAsso_DF_new_ = AdmAsso_DF['rate_completion_clean'].apply(cleanratecompletaion).apply(pd.Series)
-
-
-
-        contactlist = list_personne
-
-        for label in contactlist:
-            try:
-                AdmAsso_DF_new[label] = AdmAsso_DF[label+'_clean'].fillna('').apply(lambda x: '; '.join(x))
-            except:
-                pass
-            for ii in [ ' rating : feasible_ratio', ' rating : overall_ratio']:
-                try:
-                    AdmAsso_DF_new[label + ii] = AdmAsso_DF_new_[label + ii]
-                except:
-                    pass
-        AdmAsso_DF_new['rate_completion_clean'] = AdmAsso_DF['rate_completion_clean']
-
-
-
-print('Merging RBE')
-RCS_output = pd.merge(RCS_output, RBE_output, how='left', on='RCS')
-print(f"RBE Merged, timer : {str(timer_main.stop())}s")
-print('Merging Adm Asso')
-RCS_output = pd.merge(RCS_output, AdmAsso_DF_new, how='left', on='RCS')
-print(f"Adm Asso merged, timer : {str(timer_main.stop())}s")
-RCS_output = RCS_output.drop(columns=['IsHQ', 'Siège', 'numberOfSubsidiaries'])
-print('saving')
-RCS_output.to_excel(f'Luxembourg_merged_{suffix}.xlsx', index=False)
-RCS_output.to_csv(f'Luxembourg_merged_{suffix}.csv', index=False, sep=';')
-print(f"saved, timer : {str(timer_main.stop())}s")
-'''
+print(f"completed in {str(timer_main.stop())}s")

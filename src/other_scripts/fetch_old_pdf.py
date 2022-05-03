@@ -1,5 +1,5 @@
 from configs import settings
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
 from src.pdf_downloaders.main import main as pdf_downloader

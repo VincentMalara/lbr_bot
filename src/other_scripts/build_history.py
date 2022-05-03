@@ -1,15 +1,6 @@
-
-import os.path as path
-
-import pandas as pd
-
-
-from src.utils_merger import *
-
-
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
-from src.pdf_parsers.publications.main import main as parser
+
 #from src.pdf_parsers.publications.parser import main as parser
 
 

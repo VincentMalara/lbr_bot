@@ -7,7 +7,7 @@ from src.pdf_parsers.publications.main import main as publi_parser
 from src.utils.RCS_spliter import main as rcs_spliter
 
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
 import pandas as pd
@@ -24,20 +24,45 @@ Mongopdf= mongo(ip='146.59.152.231', db='LBR_test', col='all_pdfs')
 Mongopubli = mongo(ip='146.59.152.231', db='LBR_test', col='publications')
 Mongofinan = mongo(ip='146.59.152.231', db='LBR_test', col='financials')
 
-#DF1 = Mongoresa.find({"month":{"$in":["Janvier", "Février"]}})
 
-#Mongorbe.insert_empty_RCS(RCS=DF1['ns2:NumeroRCS'].to_list(), update_existing=True)
-#print(Mongorbe.find({'status':'to_be_updated'}))
 
-#print('----Scraping RBE---')
-#RBElist = scraper(type_='RBE', mongo=Mongorbe, to_be_updated=True)
-#print('----RBE Scraped---')
 
-print('----Parsing RCS---')
-RBElist = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
-print('----RCS Parsed---')
+DF = Mongorcsp.find({'Siège social':{ '$regex' : '.*' + 'Raiffeisen' + '.*'}})
+
+DF=DF[DF['Siège social'].str.contains('15', case=False, regex=True)].reset_index(drop=True)
+DF=DF[DF['Siège social'].str.contains('2411', case=False, regex=True)].reset_index(drop=True)
+
+print(DF)
+
+
+DF['extraction_date'] = pd.to_datetime(DF['extraction_date'], format='%d/%m/%Y')
+print(pd.DataFrame(DF['extraction_date'].value_counts()).sort_index())
+
+
+
+RCSlist = DF['RCS'].unique().tolist()
+
+print('----parsing bilans---')
+financials_parser(RCS=RCSlist, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=False)
+print('----bilans parsed ---')
 
 1/0
+#RCS_splited_lists = ["B168088", "B174897", "B187247", "B196099" ]
+
+for rcslist in RCS_splited_lists:
+    # 6 - download new pdf not yet downloaded
+    print('----Downloading pdfs---')
+    #pdf_downloader(RCS=rcslist,mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf) #always consider only new "depot"
+    print('----pdfs Downloaded ---')
+    print('----parsing publi---')
+    publi_parser(RCS=rcslist, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=False)
+    print('----publi parsed ---')
+
+
+
+print('----Parsing RCS---')
+rcs_parser(RCS=DF['RCS'].unique().tolist(), type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep,  onlynew=False)
+print('----RCS Parsed---')
 
 #Mongorcs.set_status(newstatus='scraped',dictin={'status' : 'to_be_updated', 'extraction_date':{'$nin':["10/03/2022"]}})
 #Mongorbe.set_status(newstatus='scraped',dictin={'status' : 'to_be_updated', 'extraction_date':{'$nin':["10/03/2022"]}})
@@ -84,13 +109,14 @@ print(len(RCSlist))
 
 #Mongorcs.set_to_be_updated(RCS=RCSlist)
 #Mongorbe.set_to_be_updated(RCS=RCSlist)
-
+'''
 
 #Mongorcs.set_to_be_updated(RCS=DF2["ns2:NumeroRCS"].to_list(), dictin={'extraction_date':{'$nin':['10/03/2022']}})
 #Mongorcs.insert_empty_RCS(RCSlist,  update_existing=False)
 RCSlist = Mongorcsp.get_RCSlist(dictin={"Forme juridique":{ '$regex' : '.*' + 'commandite spéciale' + '.*'}})
                                         #'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
 
+'''
 #missing nace
 RCSlist = Mongorcsp.get_RCSlist({'Code NACE (Information mise à jour mensuellement)':{'$exists':False}})
 Mongorcs.set_to_be_updated(RCS=RCSlist)
@@ -105,14 +131,14 @@ Mongorcs.set_to_be_updated(RCS=RCSlist)
 print('----Scraping RCS---')
 RCSlist_scr = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
 print('----RCS Scraped---')
-
+'''
 
 # 3 - parse RCS of RCS list
 print('----Parsing RCS---')
 rcs_parser(RCS=RCSlist, type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp,  onlynew=False)
 print('----RCS Parsed---')
 
-
+'''
 # 4 - scrap RCS list in RBE: only the one in no ro new as changed RCS
 print('----Scraping RBE---')
 RBElist = scraper(type_='RBE', mongo=Mongorbe, to_be_updated=True)

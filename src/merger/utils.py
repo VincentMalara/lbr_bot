@@ -1,41 +1,11 @@
 from datetime import datetime
 import math
 import re
+
+
 import numpy as np
-
-
 import pandas as pd
-''''
-NEWCOLUMNDICT = {
-    'Numéro de RCS': "RCS",
-    'Nom': "name",
-    'Dénomination commerciale (si existante)': "Denomination",
-    'Année de création': "yearOfCreation",
-    "Date d'immatriculation": "Date d'immatriculation",
-    'Type de société': "keyword",
-    'Statut légal': "legalStatus",
-    'Adresse': "address1",
-    'Code postal': "czip",
-    'Ville': "city",
-    'Pays': "country",
-    'Bénéficiaire Effectif': "UBO",
-    "Autorisation d'établissement": 'Autorisation(s)',
-    'Capital social / Fonds social':'Capital social / Fonds social',
-    'Données personnelles - Indépendants': 'Données personnelles',
-    'Objet': "Objet_new",
-    'Associés commandités': 'Associé(s) commandité(s)',
-    'Administrateurs': 'Administrateur(s) / Gérant(s)',
-    'Associés': 'Associé(s)',
-    'Associé(s) solidaire(s)':'Associé(s) solidaire(s)',
-    'Personne(s) ayant le pouvoir d engager la société': "Personne(s) ayant le pouvoir d engager la société",
-    'Représentant(s) permanent(s) pour l activité de la succursale': "Représentant(s) permanent(s) pour l activité de la succursale",
-    'Président / directeur(s)': 'Président / directeur(s)',
-    'Personne(s) autorisée(s) à gérer, administrer et signer':'Personne(s) autorisée(s) à gérer, administrer et signer',
-    'Personne(s) chargée(s) du contrôle des comptes':'Personne(s) chargée(s) du contrôle des comptes',
-    'Société de gestion':'Société de gestion',
-    'Délégué(s) à la gestion journalière':'Délégué(s) à la gestion journalière'
-}
-'''
+
 
 list_personne = [
             "Gérant/Administrateur", "Délégué à la gestion journalière", "Actionnaire/Associé",
@@ -51,24 +21,41 @@ PERSON_MERGED_REVERSED = {
     "Personne(s) chargée(s) du contrôle des comptes": ["Personne(s) chargée(s) du contrôle des comptes"],
     "Société de gestion": ["Société de gestion"]}
 
+def calc_if_exist(DFold, DFnew, oldlabel, newlabel, function=None):
+    if oldlabel in DFold.columns:
+        print(f'{oldlabel} IS a column of DFold')
+        if function:
+            DFnew[newlabel] = DFold[oldlabel].apply(function)
+        else:
+            DFnew[newlabel] = DFold[oldlabel]
+    else:
+        print(f'{oldlabel} IS NOT a column of DFold')
+    return DFnew
+
+def cleanjusqua(x):
+    if x != '':
+        x = str(x)
+        x = x.replace("jusqu'à", "jusqu à")
+        x = eval(x)
+    return x
+
 def get_list_of_modif(list_):
-  output={}
-  for label in list_personne:
-    output[label] = {}
-    output[label]['needed_full'] = 0
+    output={}
+    for label in list_personne:
+        output[label] = {}
+        output[label]['needed_full'] = 0
 
-  if isinstance(list_, list):
-    for depot in list_:
-      if isinstance(depot, dict):
-        #if depot['Type_de_depot'] in FILE_LABEL_LIST or True:
-        for label in list_personne:
-          if isinstance(depot['Detail'], str):
-            for pmr in PERSON_MERGED_REVERSED[label]:
-              if depot['Detail'].find(pmr) != -1:
-                output[label]['needed_full'] +=1
-                break
-
-  return output
+    if isinstance(list_, list):
+        for depot in list_:
+            if isinstance(depot, dict):
+                #if depot['Type_de_depot'] in FILE_LABEL_LIST or True:
+                for label in list_personne:
+                    if isinstance(depot['Detail'], str):
+                        for pmr in PERSON_MERGED_REVERSED[label]:
+                            if depot['Detail'].find(pmr) != -1:
+                                output[label]['needed_full'] +=1
+                                break
+    return output
 
 def clean_list(x):
     y = []

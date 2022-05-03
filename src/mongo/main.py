@@ -194,6 +194,9 @@ class mongo():
     def set_to_be_updated(self, RCS = None, dictin=None):
         self.set_status(newstatus='to_be_updated', RCS=RCS, dictin=dictin)
 
+    def set_done(self, RCS = None, dictin=None):
+        self.set_status(newstatus='done', RCS=RCS, dictin=dictin)
+
     def drop_duplicates(self, colsel=None, coldup=None, seldict={}):
 
         dictout = {'RCS': 1,'extraction_date':1,"task_index":1, '_id': 0}

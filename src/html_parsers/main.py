@@ -12,7 +12,7 @@ from src.utils.RCS_spliter import main as rcs_spliter
 
 NMAX = settings.NMAX
 
-def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
+def main(type_='rcs', rcs=None, mongo='', mongoparsed='', onlynew=True):
 
     if type_ == 'rcs':
         from src.html_parsers.rcs.parser import main as parser
@@ -20,13 +20,13 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
     elif type_ == 'rbe':
         from src.html_parsers.rbe.parser import main as parser
 
-    if not onlynew and RCS is None:
+    if not onlynew and rcs is None:
         mongoparsed.delete()
 
     task_index = mongoparsed.get_index_max() + 1
 
-    if RCS is not None:
-        list_, dict_rcs, status, msg = rcs_input_checker(RCS=RCS)
+    if rcs is not None:
+        list_, dict_rcs, status, msg = rcs_input_checker(RCS=rcs)
         if not status:
             print(msg)
             sys.exit()
@@ -39,36 +39,36 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
 
 
     RCS_splited_lists = rcs_spliter(base_RCS_list, NMAX)
-    print(len(RCS_splited_lists))
+    #print(len(RCS_splited_lists))
 
     RCSDF = pd.DataFrame()
     test = False
 
     for count, rcslist in enumerate(RCS_splited_lists):
         status = True
-        print(count)
+        #print(count)
         if onlynew:
-            print('A')
+            #print('A')
             alreadydone = mongoparsed.find_from_RCSlist(rcslist)
-            print('already done done')
+            #print('already done done')
             if 'RCS' in alreadydone.columns:
                 if alreadydone.shape[0] > 0:
-                    print('B')
+                    #print('B')
                     rcslist = np.array(rcslist)
-                    print(rcslist.shape)
+                    #print(rcslist.shape)
                     rcslist=rcslist[~np.isin(rcslist, alreadydone['RCS'])].tolist()
-                    print(len(rcslist))
+                    #print(len(rcslist))
             if len(rcslist) > 0:
-                print('C')
+                #print('C')
                 dict_split = {"RCS": {'$in': rcslist}}
                 dict_ = {**dict_, **dict_split}
                 RCSDF = mongo.find(dict_)
-                print(RCSDF.head())
-                print('RCSDF done')
+                #print(RCSDF.head())
+                #print('RCSDF done')
             else:
                 status = False
         else: #not only new
-            if RCS is None: #--> repars all in ths case
+            if rcs is None: #--> repars all in ths case
                 #print("All RCS will be reparsed")
                 task_index = -1
             RCSDF = mongo.find_from_RCSlist(rcslist)
@@ -79,16 +79,16 @@ def main(type_='rcs', RCS=None, mongo='', mongoparsed='', onlynew=True):
             status = False
 
         if status:
-            print('processing')
+            #print('processing')
             RCSparsed = RCSDF.apply(lambda x: parser(x, task_index), axis=1).to_list()
-            print(len(RCSparsed))
-            print(RCSparsed[0])
-            print('processed')
+            #print(len(RCSparsed))
+            #print(RCSparsed[0])
+            #print('processed')
             if onlynew:
                 mongoparsed.delete(data=RCSDF, RCS=True)
-                print('deleted')
+                #print('deleted')
             mongoparsed.insert(RCSparsed)
-            print('inserted')
+            #print('inserted')
             test = True
 
     if test and (type_ == 'rcs'):

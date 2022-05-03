@@ -6,7 +6,7 @@ from src.html_parsers.rbe.main import main as rbe_parser
 #from src.pdf_parsers.financials.main import main as financials_parser
 #from src.pdf_parsers.publications.main import main as publi_parser
 
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
 import pandas as pd

@@ -1,7 +1,7 @@
 from configs import settings
 from src.pdf_downloaders.utils import PdfDownloader, check_temp_exist
 from src.mongo.main import mongo
-from .utils.timer import performance_timer
+from src.utils.timer import performance_timer
 from src.utils.RCS_spliter import main as rcs_spliter
 
 import pandas as pd
