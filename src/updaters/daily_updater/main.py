@@ -27,7 +27,7 @@ def main():
 
 
     print("---- Updating from Resa ----")
-    resa(Mongoresa=Mongoresa, Mongoresaparsed=Mongoresaparsed, Mongorcs=Mongorcs, nmonth=3)
+    resa(Mongoresa=Mongoresa, Mongoresaparsed=Mongoresaparsed, Mongorcs=Mongorcs, nmonth=4)
     print(f"---- Updated from Resa at {str(timer_main.stop())}s ----")
 
 
@@ -75,8 +75,8 @@ def main():
     print(f"---- Merging done at {str(timer_main.stop())}s ----")
 
 
-    print(RCS_output)
-    RCS_output.to_excel('tbd__.xlsx')
+    #tobedel
+    RCS_output.to_csv('update_03052022.csv', sep=';')
 
     print('---- Messaging ----')
     #message(RCS_output)

@@ -24,7 +24,6 @@ def generate_last_n_month(n):
     todayyear = datetime.today().year
     todaymonth = datetime.today().month
     monthlist = []
-
     for year in [todayyear-1, todayyear]:
         for month in MONTHDICT.keys():
             monthlist.append(f"{year}-{MONTHDICT[month]}")
@@ -141,16 +140,16 @@ class Resa(scraper):
                         dictout['codeRESA'] = coderesa
                         dictout['status'] = 'to_be_updated'
                         output.append(dictout)
-            self.tobeupdated = pd.DataFrame.from_records(output[:30])#!!!!!!!
-            self.mongoRESAparsed.insert(output[:30])#!!!!!!!
+            self.tobeupdated = pd.DataFrame.from_records(output)
+            self.mongoRESAparsed.insert(output)
 
         else:
             print("error at extract_xmls: nothing sraped yet from RESA")
 
     def set_rcs_to_be_updated(self):
         if self.pages.shape[0] > 0:
-            rcslist=self.tobeupdated['ns2:NumeroRCS'].unique().tolist()
-            coderesalist=self.pages['codeRESA'].unique().tolist()
+            rcslist = self.tobeupdated['ns2:NumeroRCS'].unique().tolist()
+            coderesalist = self.pages['codeRESA'].unique().tolist()
             self.mongorcs.insert_empty_RCS(rcslist, update_existing=True)
             self.mongoRESA.set_done(dictin={'codeRESA':{'$in':coderesalist}})
             self.mongoRESAparsed.set_done(dictin={'codeRESA':{'$in':coderesalist}})
