@@ -50,10 +50,10 @@ def main():
     '''
 
     #to be del
-    Mongorcs.set_to_be_updated(RCS=rcs_list)
+    #Mongorcs.set_to_be_updated(RCS=rcs_list)
 
     print('---- Scraping RCS ----')
-    rcs_list = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
+    #rcs_list = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
     print(f"---- RCS scraped at {str(timer_main.stop())}s ----")
 
     '''
