@@ -15,12 +15,10 @@ class Rabbit():
 
     def send_message(self, message, rcs_list=None):
         try:
-            '''
             self.channel.queue_declare(queue='lbr_bot', durable=True)
             self.channel.basic_publish(exchange='',
                               routing_key='lbr_bot',
                               body=message)
-            '''
             if rcs_list is not None:
                 logger.info(f"info at rabbit.send {rcs_list} sent")
         except Exception as e:

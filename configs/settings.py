@@ -42,4 +42,4 @@ temp = '/temp/'
 #Rabbit
 rabbit_user = 'rbuser2'
 rabbit_psw = 'rabibit22z'
-rabbit_param = ['51.77.132.103', 5672, '/']
+rabbit_param = ['51.91.62.122', 5672, '/'] #51.77.132.103
