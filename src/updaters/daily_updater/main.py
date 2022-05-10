@@ -139,7 +139,9 @@ def main():
 
     #print(len(rcs_list))
 
+
     try:
+        1/0
         print('---- Merging ----')
         RCS_output = merger(Mongorcs=Mongorcs, Mongorbe=Mongorbe, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep,
                             Mongopdf=Mongopdf, Mongopubli=Mongopubli, Mongofinan=Mongofinan, rcs_list=rcs_list)

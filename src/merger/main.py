@@ -178,9 +178,12 @@ def main(Mongorcs, Mongorbe, Mongorcsp, Mongorbep, Mongopdf, Mongopubli, Mongofi
         RCS_output = pd.merge(RCS_output, bilan_DF_new, how='left', on='RCS')
         del bilan_DF_new
 
-        RCS_output['Gérant/Administrateur'] = RCS_output['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
-        RCS_output['Délégué à la gestion journalière'] = RCS_output['Délégué à la gestion journalière'].fillna('').apply(cleanjusqua)
-        RCS_output['Personne(s) chargée(s) du contrôle des comptes'] = RCS_output['Personne(s) chargée(s) du contrôle des comptes'].fillna('').apply(cleanjusqua)
+        for label in ['Gérant/Administrateur', 'Délégué à la gestion journalière', 'Personne(s) chargée(s) du contrôle des comptes']:
+            RCS_output = calc_if_exist(RCS_output, RCS_output, label, label, function=cleanjusqua)
+
+        #RCS_output['Gérant/Administrateur'] = RCS_output['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
+        #RCS_output['Délégué à la gestion journalière'] = RCS_output['Délégué à la gestion journalière'].fillna('').apply(cleanjusqua)
+        #RCS_output['Personne(s) chargée(s) du contrôle des comptes'] = RCS_output['Personne(s) chargée(s) du contrôle des comptes'].fillna('').apply(cleanjusqua)
     else:
         RCS_output = pd.DataFrame()
     return RCS_output
