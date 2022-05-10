@@ -42,7 +42,7 @@ def main():
            'B16923', 'B16924', 'B17015', 'B17016', 'B17020', 'B17218', 'B17286', 'B17298', 'B17479', 'B182934', 'B215643',
            'B221018', 'B221019', 'B248373', 'B249879', 'B255380', 'B262114', 'B39099', 'B56047', 'E1879', 'E2226', 'E229',
            'E2818', 'E4589', 'E4738', 'E5555', 'E7052', 'E7905', 'E831','B256373']
-    '''
+    
     rcs_list = [ 'B17298', 'B17479', 'B182934']
 
     '''
@@ -55,11 +55,11 @@ def main():
         logger.error(f'error at main.resa: {e}')
         logger.info('bot has been stopped')
         sys.exit()
-    '''
+
 
 
     #to be del
-    Mongorcs.set_to_be_updated(RCS=rcs_list)
+    #Mongorcs.set_to_be_updated(RCS=rcs_list)
 
     print('---- Scraping RCS ----')
     try:
