@@ -96,7 +96,9 @@ def main(Mongorcs, Mongorbe, Mongorcsp, Mongorbep, Mongopdf, Mongopubli, Mongofi
         for sub_rcs_list in RCS_splited_lists:
             LBR_RCS_file_DFnew = Mongopubli.find_from_RCSlist(RCS=sub_rcs_list)
             if LBR_RCS_file_DFnew.shape[0] > 0:
-                LBR_RCS_file_DFnew['Date'] = pd.to_datetime(LBR_RCS_file_DFnew['Date'], format='%d/%m/%Y')
+                LBR_RCS_file_DFnew['Date'] = pd.to_datetime(LBR_RCS_file_DFnew['Date'], format='%d/%m/%Y', errors='coerce')
+                LBR_RCS_file_DFnew['Date'] = LBR_RCS_file_DFnew['Date'].fillna('empty')
+                LBR_RCS_file_DFnew = LBR_RCS_file_DFnew[LBR_RCS_file_DFnew['Date'] != 'empty'].reset_index(drop=True)
                 LBR_RCS_file_DF = pd.concat([LBR_RCS_file_DF, LBR_RCS_file_DFnew])
                 #print(LBR_RCS_file_DF.shape)
 

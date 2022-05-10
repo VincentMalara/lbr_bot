@@ -7,7 +7,9 @@ import pymongo
 from configs import settings
 from .utils import clean_list_dict_nan
 from src.utils.handle_RCS_list import main as rcs_input_checker
+from src.utils.set_logger import main as set_logger
 
+logger = set_logger()
 
 mongo_ip = settings.mongo_ip
 mongo_port = settings.mongo_port
@@ -39,18 +41,20 @@ class mongo():
         df_found = []
         if dictin is None:
             dictin = {}
-            print('info at mongo.get_RCSlist : no input dict provided, complete collection will be returned')
+            #print('info at mongo.get_RCSlist : no input dict provided, complete collection will be returned')
         if isinstance(dictin, list):
-            print("info at mongo.get_RCSlist input is a list, it will be converted to a mongo query")
+            #print("info at mongo.get_RCSlist input is a list, it will be converted to a mongo query")
             dictin = {"RCS": {'$in': dictin}}
         if isinstance(dictin, dict):
             df_found = self.find(dictin, {'RCS': 1, '_id': 0}) #in case you need only RCS list
             if df_found.shape[0] == 0:
                 df_found = []
                 print("info at mongo.get_RCSlist returned empty result")
+                logger.info("info at mongo.get_RCSlist returned empty result")
             else:
                 df_found = df_found['RCS'].to_list()
         else:
+            logger.error(f"error at mongo.get_RCSlist input is not a dict, {type(dictin)} not accepted")
             print(f"error at mongo.get_RCSlist input is not a dict, {type(dictin)} not accepted")
         return df_found
 
@@ -59,6 +63,7 @@ class mongo():
         df_found = []
         if RCS is None:
             print('error at mongo.find_from_RCSlist : at least a RCS  number is needed')
+            logger.error('error at mongo.find_from_RCSlist : at least a RCS  number is needed')
         else:
             list_, dict_, status, msg = rcs_input_checker(RCS=RCS)
             if dict_ is not None:
@@ -66,12 +71,14 @@ class mongo():
                     df_found = self.find(dict_,{'RCS': 1, '_id': 0}) #in case you need only RCS list
                     if df_found.shape[0] == 0:
                         print("mongo.find_from_RCSlist returned empty result")
+                        logger.info("mongo.find_from_RCSlist returned empty result")
                     else:
                         df_found = df_found['RCS'].to_list()
                 else:
                     df_found = self.find(dict_)
                     if df_found.shape[0] == 0:
                         print("mongo.find_from_RCSlist returned empty result")
+                        logger.info("mongo.find_from_RCSlist returned empty result")
         return df_found
 
 
@@ -80,18 +87,19 @@ class mongo():
         if col is not None:
             if not isinstance(data, pd.DataFrame):
                 print(f'info at mongo.insert : {col} will not be used as input is not a dataframe')
+                logger.info(f'info at mongo.insert : {col} will not be used as input is not a dataframe')
             if isinstance(data, pd.DataFrame):
                 if col not in data.columns:
                     print(f'info at mongo.insert : {col} will not be used as it s not a column from the dataframe')
+                    logger.info(f'info at mongo.insert : {col} will not be used as input is not a dataframe')
         else:
             if isinstance(data, pd.DataFrame):
                 if 'RCS' in data.columns:
                     col = 'RCS'
                     print(f'info at mongo.insert : RCS will be used instead')
-
+                    logger.info(f'info at mongo.insert : RCS will be used instead')
         if isinstance(data, list):
             data = pd.DataFrame(data)
-
         if isinstance(data, pd.DataFrame):
             if data.shape[0] > 0:
                 if '_id' in data.columns:
@@ -102,10 +110,12 @@ class mongo():
                 self.collection.insert_many(dictout)
             else:
                 print('error at mongo.insert : input DF is empty')
+                logger.error('error at mongo.insert : input DF is empty')
         elif isinstance(data, dict):
             self.collection.insert_one(data)
         else:
             print('error at mongo.insert : not accepted input format. DF, list or dict accepted')
+            logger.error('error at mongo.insert : not accepted input format. DF, list or dict accepted')
             status = False
         return status
 
@@ -118,35 +128,39 @@ class mongo():
             for row in data:
                 self.collection.delete_many(row)
         elif isinstance(data, pd.DataFrame) and RCS:
-            print('list of RCS')
+            #print('list of RCS')
             if 'RCS' in data.columns:
                 try:
                     dict_ = {"RCS": {'$in': data['RCS'].to_list()}}
                     self.collection.delete_many(dict_)
                 except Exception as e:
-                    print(f'error at mongo.delete: {e}')
+                    print(f'error at mongo.delete, DF mode: {e}')
+                    logger.error(f'error at mongo.delete, DF mode: {e}')
             else:
                 print('error at delete: no RCS columns in input DF')
+                logger.error('error at delete: no RCS columns in input DF')
         elif isinstance(data, list) and not RCS:
-            print('list of RCS')
+            #print('list of RCS')
             for row in data:
                 try:
                     self.collection.delete_many(row)
-                    print('list of dict')
+                    #print('list of dict')
                 except Exception as e:
-                    print(f'error at mongo.delete: {e}')
+                    print(f'error at mongo.delete, list mode without RCS: {e}')
+                    logger.error(f'error at mongo.delete, list mode without RCS: {e}')
         elif isinstance(data, list) and RCS:
-            print('list of RCS')
+            #print('list of RCS')
             try:
                 dict_ = {"RCS": {'$in': data}}
                 self.collection.delete_many(dict_)
             except Exception as e:
-                print(f'error at mongo.delete: {e}')
-
+                print(f'error at mongo.delete, list mode with RCS: {e}')
+                logger.error(f'error at mongo.delete, list mode with RCS: {e}')
         elif isinstance(data, dict):
             self.collection.delete_many(data)
         else:
             print('error at mongo.delete : not accepted input format. DF, list or dict accepted')
+            logger.error('error at mongo.delete : not accepted input format. DF, list or dict accepted')
             status = False
         return status
 
@@ -156,28 +170,32 @@ class mongo():
             if isinstance(query, dict): #in case query is a dict
                 self.collection.update_many(query, {"$set": newdatas})
             elif isinstance(query, pd.DataFrame): #in case input RCS is a dataframe
-                print("mongo.findRCS in dataframe mode")
+                #print("mongo.findRCS in dataframe mode")
                 if 'RCS' in query.columns: #in case it's a DF, check if there is a RCS
                     dict_ = {"RCS": {'$in': query['RCS'].to_list()}}
                     self.collection.update_many(dict_, {"$set": newdatas})
                 else:
                     print("mongo.findRCS there is no RCS columns in dataframe")
+                    logger.info("mongo.findRCS there is no RCS columns in dataframe")
             elif isinstance(query, list): #in case input RCS is a list
                 dict_ = {"RCS": {'$in': query}}
                 self.collection.update_many(dict_, {"$set": newdatas})
             else:
                 print('error at mongo.update : not accepted input format: dict accepted')
+                logger.error('error at mongo.update : not accepted input format: dict accepted')
                 status = False
         else:
             print('error at mongo.update : not accepted update input format: dict accepted')
+            logger.error('error at mongo.update : not accepted update input format: dict accepted')
             status = False
         return status
 
     def set_status(self, newstatus: str = None, RCS=None, dictin=None): #take as input a RCS number, a list or a DF with a RCS column and a dict
-        print(f'setting status to {newstatus}')
-        print(RCS)
+        #print(f'setting status to {newstatus}')
+        #print(RCS)
         if newstatus is None:
             print('error at mongo.set_status : no newstatus set')
+            logger.error('error at mongo.set_status : no newstatus set')
             sys.exit()
         else:
             updater = {'status': newstatus}
@@ -197,8 +215,7 @@ class mongo():
     def set_done(self, RCS = None, dictin=None):
         self.set_status(newstatus='done', RCS=RCS, dictin=dictin)
 
-    def drop_duplicates(self, colsel=None, coldup=None, seldict={}):
-
+    def drop_duplicates(self, colsel=None, coldup=None, seldict=None):
         dictout = {'RCS': 1,'extraction_date':1,"task_index":1, '_id': 0}
         if coldup is not None:
             dict2 = {coldup: 1}
@@ -206,7 +223,8 @@ class mongo():
         if colsel is not None:
             dict2 = {colsel: 1}
             dictout = {**dictout, **dict2}
-
+        if seldict is None:
+            seldict = {}
         DF = self.find(dictin=seldict, dictout=dictout)
         if DF.shape[0] > 0:
             if "task_index" in DF.columns:
@@ -214,15 +232,17 @@ class mongo():
                     colsel = "task_index"
                     print('coldup set to task_index')
             else:
-                print('task_index not in Dataframe ')
+                print('error at mongo.drop_duplicates: task_index not in Dataframe')
+                logger.error('error at mongo.drop_duplicates: task_index not in Dataframe')
                 sys.exit()
 
             if coldup is None:
                 if "RCS" in DF.columns:
                     coldup = 'RCS'
-                    print('coldup set to RCS')
+                    #print('coldup set to RCS')
                 else:
-                    print('RCS not in Dataframe ')
+                    print('error at drop_duplicates: RCS not in Dataframe while coldup is None')
+                    logger.error('error at drop_duplicates: RCS not in Dataframe while coldup is None')
                     sys.exit()
 
             if colsel is not None:
@@ -239,14 +259,19 @@ class mongo():
 
                         else:
                             print(f'error at mongo.drop_duplicates : {coldup} not found in {self.col}')
+                            logger.error(f'error at mongo.drop_duplicates : {coldup} not found in {self.col}')
                     else:
                         print(f'error at mongo.drop_duplicates : {coldup} not in input')
+                        logger.error(f'error at mongo.drop_duplicates : {coldup} not in input')
                 else:
                     print(f'error at mongo.drop_duplicates : {colsel} not found in {self.col}')
+                    logger.error(f'error at mongo.drop_duplicates : {colsel} not found in {self.col}')
             else:
                 print(f'error at mongo.drop_duplicates : {colsel} not found in {self.col}')
+                logger.error(f'error at mongo.drop_duplicates : {colsel} not found in {self.col}')
         else:
-            print('at mongo.drop_duplicates : no duplicates')
+            print('info at mongo.drop_duplicates : no duplicates')
+            logger.info('info at mongo.drop_duplicates : no duplicates')
 
     def get_index_max(self):
         DF = self.find({},{'task_index': 1, '_id': 0})
@@ -255,12 +280,11 @@ class mongo():
         else:
             index = 0
             print(f'task_index not in {self.col}')
+            logger.info(f'info at mongo.get_index_max : task_index not in {self.col}')
         return index
 
     def insert_empty_RCS(self, RCS, update_existing=True):
-
         RCS, dict_, status, msg = rcs_input_checker(RCS=RCS)
-
         if isinstance(RCS, list):
             existing = self.get_RCSlist(RCS)
             tobecreated = [rcs for rcs in RCS if rcs not in existing]
@@ -275,12 +299,14 @@ class mongo():
                 self.insert(DF)
             else:
                 print(f"info at insert_empty_RCS: no RCS to input")
+                logger.info(f"info at insert_empty_RCS: no RCS to input")
             if update_existing:
                 self.set_to_be_updated(RCS=RCS)
         else:
             print(f"error at insert_empty_RCS: {type(RCS)} cannot be used as input")
-
+            logger.error(f"error at insert_empty_RCS: {type(RCS)} cannot be used as input")
 
     def close(self): #close the connection  when finish
-        print(f'closing {self.db} , {self.col}')
+        #print(f'closing {self.db} , {self.col}')
+        #logger.info(f'closing {self.db} , {self.col}')
         self.conn.close()

@@ -81,7 +81,8 @@ class scraper():
             self.status = True
         except Exception as e:
             self.status = False
-            print(f'error at get_url: {e}')
+            print(f'error at scraper.get_url: {e}')
+            logger.error(f'error at scraper.get_url: {e}')
             ee = e
         return ee
 
@@ -93,6 +94,7 @@ class scraper():
         if not self.status:
             while trial < 3:
                 print(f"trial at get_LBR_page: {trial}")
+                logger.info(f"trial at get_LBR_page: {trial}")
                 time.sleep(2*trial)
                 self.reset()
                 e = self.get_url()
@@ -103,10 +105,9 @@ class scraper():
             print(f'driver has been stop because of following error at get_LBR_page: {e}')
             logger.error(f'driver has been stop because of following error at get_LBR_page: {e}')
             sys.exit()
-
         time.sleep(random.random()+1.5)
         self.RUA = self.driver.execute_script("return navigator.userAgent;")
-        print(self.RUA)
+        print(f'user agent: {self.RUA}')
         logger.info(f'user agent: {self.RUA}')
 
     def quit(self):
@@ -116,14 +117,14 @@ class scraper():
             print('driver has been closed')
             logger.info('driver has been closed')
         except Exception as e:
-            logger.debug('not managed to close driver properly')
-            print(f'error at quit : {e}')
+            logger.error(f'error at scraper.quit : {e}')
+            print(f'error at scraper.quit : {e}')
 
     def accept_t(self):
         #print(' - accept_t()')
         if not check_page(self.driver, 'Conditions générales du LBR', 'h1'):
-            logger.debug("page error at accept_t(driver) - Conditions générales")
-            print("page error at accept_t(driver) - Conditions générales")
+            logger.error("page error at sraper.accept_t(driver) - Conditions générales")
+            print("page error at sraper.accept_t(driver) - Conditions générales")
             self.status=False
         else:
             pass
@@ -132,11 +133,11 @@ class scraper():
             connection = self.driver.find_element_by_id('conditionsversionId')
             connection.click()
             time.sleep(random.random()+0.5)
-            logger.info("terms and cond accepeted successfully")
+            #logger.info("terms and cond accepeted successfully")
             self.status = True
         except Exception as e:
-            logger.error(f"error at accept_t: {e}")
-            print(f"error at accept_t: {e}")
+            logger.error(f"error at scraper.accept_t: {e}")
+            print(f"error at scraper.accept_t: {e}")
             self.status = False
 
 
@@ -144,8 +145,8 @@ class scraper():
         #print(' - break_captcha()')
         #try:
         if not check_page(self.driver, 'Question de sécurité', 'h3'):
-            logger.debug("page error at break_captcha(driver) - Question de sécurité")
-            print("page error at break_captcha(driver) - Question de sécurité")
+            logger.error("page error at scraper.break_captcha(driver) - Question de sécurité")
+            print("page error at scraper.break_captcha(driver) - Question de sécurité")
             self.status = False
         else:
             pass
@@ -180,21 +181,21 @@ class scraper():
             time.sleep(random.random()+1.5)
         except Exception as e:
             self.status = False
-            logger.error(f"error at get_connected : {e}")
-            print(f"error at get_connected : {e}")
+            logger.error(f"error at scraper.get_connected : {e}")
+            print(f"error at scraper.get_connected : {e}")
 
         if not check_page(self.driver, 'Utilisateur anonyme', 'span'):
             self.status = False
-            logger.debug("page error at get_connected(driver) - Utilisateur anonyme")
-            print("page error at get_connected(driver) - Utilisateur anonyme")
+            logger.debug("page error at scraper.get_connected(driver) - Utilisateur anonyme")
+            print("page error at scraper.get_connected(driver) - Utilisateur anonyme")
         else:
             try: #click on utilisateur anonyme
                 connection = self.driver.find_element_by_link_text('Utilisateur anonyme')
                 connection.click()
             except Exception as e:
                 self.status = False
-                logger.error(f"error at get_connected : {e}")
-                print(f"error at get_connected : {e}")
+                logger.error(f"error at scraper.get_connected : {e}")
+                print(f"error at scraper.get_connected : {e}")
             if self.status:
                 time.sleep(random.random()+1.5)
                 self.break_captcha()
@@ -203,9 +204,10 @@ class scraper():
                 try:
                     self.check_connected()
                 except Exception as e:
-                    print(f'self.status check_co error: {e}')
+                    print(f"error at scraper.get_connected, self.status check_co error: {e}")
+                    logger.error(f"error at scraper.get_connected, self.status check_co error: {e}")
                     self.status = False
-                print(f'self.status check_co : {self.status}')
+                #print(f'self.status check_co : {self.status}')
 
     def get_search(self):
         if self.type == 'rbe':
@@ -214,13 +216,13 @@ class scraper():
             search_button = 'Rechercher un dossier RCS'
         else:
             self.status = False
-            print(f"type {self.type} is not valid for get search")
-            logger.info(f"type {self.type} is not valid for get search")
+            print(f"error at scraper.get_search type {self.type} is not valid for get search")
+            logger.error(f"error at scraper.get_search type {self.type} is not valid for get search")
         if self.status:
             self.driver.get(self.url)
             if not check_page(self.driver, 'Rechercher un dossier R', 'a'):
-                logger.debug("page error at get_connected(driver) - Rechercher un dossier R")
-                print("page error at get_connected(driver) - Rechercher un dossier R")
+                logger.debug("page error at scraper.get_search - Rechercher un dossier R")
+                print("page error at scraper.get_search - Rechercher un dossier R")
                 self.status = False
             else:
                 rech = self.driver.find_element_by_link_text(search_button)
@@ -232,8 +234,8 @@ class scraper():
     def get_journal(self):
         if self.type in ['resa']:
             if not check_page(self.driver, 'Journal des publications', 'a'):
-                logger.debug("page error at get_journal() - Journal des publications")
-                print("page error at get_journal() - Journal des publications")
+                logger.debug("page error at scraper.get_journal() - Journal des publications")
+                print("page error at scraper.get_journal() - Journal des publications")
                 self.status = False
             else:
                 journal = self.driver.find_element_by_link_text('Journal des publications')
@@ -241,8 +243,8 @@ class scraper():
                 time.sleep(random.random() + 0.5)
                 self.status = True
         else:
-            logger.debug(f"get_journal not valid for {self.type} type")
-            print(f"get_journal not valid for {self.type} type")
+            logger.error(f"scraper.get_journal not valid for {self.type} type")
+            print(f"scraper.get_journal not valid for {self.type} type")
             self.status = False
 
     def get_main_page(self):
@@ -251,25 +253,25 @@ class scraper():
         elif self.type in ['rcs', 'rbe']:
             self.get_search()
         else:
-            logger.debug(f"get_main_page not valid for {self.type} type")
-            print(f"get_main_page not valid for {self.type} type")
+            logger.error(f"scraper.get_main_page not valid for {self.type} type")
+            print(f"scraper.get_main_page not valid for {self.type} type")
 
     def check_connected(self):
         page_content = beautifulsoup.BeautifulSoup(self.driver.page_source, features="html.parser")
         found = page_content.find_all("a", {"class": "deconnected"})
 
         if len(found) > 0:
-            logger.debug(f'Not connected anymore')
-            print(f'Not connected anymore')
+            logger.info('info at scraper.check_connected Not connected anymore')
+            print('info at scraper.check_connected Not connected anymore')
             output = False
             self.status = False
             n = 0
             test_deco_click = True
             while test_deco_click:
                 test_deco_click = ((not output) and (n < 4))
-                print(test_deco_click)
+                #print(test_deco_click)
                 n += 1
-                print(n)
+                #print(n)
                 try:
                     connection = self.driver.find_element_by_class_name('deconnected')
                     connection.click()
@@ -278,14 +280,15 @@ class scraper():
                 except Exception as e:
                     self.status = False
                     output = False
-                    print(f" error while trying to click on connection: {e}")
+                    print(f" error at scraper.check_connected while trying to click on connection: {e}")
+                    logger.error(f" error at scraper.check_connected while trying to click on connection: {e}")
                 time.sleep(random.random() + 1.5)
                 print("clicked on connexion")
                 page_content = beautifulsoup.BeautifulSoup(self.driver.page_source, features="html.parser")
                 found = page_content.find_all("a", {"class": "deconnected"})
                 if len(found) == 0:
-                    logger.debug('reconnected after clicking on connexion')
-                    print('reconnected after clicking on connexion')
+                    logger.info('info at scraper.check_connected: reconnected after clicking on connexion')
+                    print('info at scraper.check_connected: reconnected after clicking on connexion')
                     self.status = True
         else:
             self.status = True
@@ -299,11 +302,12 @@ class scraper():
         time.sleep(2)
         if check_page(self.driver, "Acceptation des conditions générales", "b"):
             self.accept_t()
-            print('accepted')
+            #print('accepted')
         try:
             self.check_connected()
         except Exception as e:
-            print(f'error at launch: {e}')
+            print(f'error at scraper.launch: {e}')
+            logger.error(f'error at scraper.launch: {e}')
             self.status = False
 
     def check_page(self, check_phrase, type_):
@@ -323,8 +327,8 @@ class scraper():
             self.info = str(page.find_all('div', dict_info))
             self.status = True
         else:
-            print(f'error at extract_page: {self.type} not accepted')
-            logger.debug(f'error at extract_page: {self.type} not accepted')
+            print(f'error at scraper.extract_page: {self.type} not accepted')
+            logger.debug(f'error at scraper.extract_page: {self.type} not accepted')
             self.status = False
         #except Exception as e:
          #   print(f'error at extract_page: {self.rcs}, error : {e}')
@@ -335,49 +339,52 @@ class scraper():
         status = False
         msg=''
         if rcs_list is None:
-            print('error at rcs.scrap_list : rcs_list input is missing')
-            logger.error('error at rcs.scrap_list : rcs_list input is missing')
+            print('error at scraper.scrap_list : rcs_list input is missing')
+            logger.error('error at scraper.scrap_list : rcs_list input is missing')
         else:
             self.rcs_list, dict_,  status, msg = HandleRcsList(rcs_list)
-
         if not status:
             print(msg)
             logger.error(msg)
             sys.exit()
-
         if status:
             self.dict_page = []
             N = 0
             for rcs in self.rcs_list:
                 N+=1
-                print(f"N: {N}")
-                print(f"rcs: {rcs}")
+                #print(f"N: {N}")
+                #print(f"rcs: {rcs}")
                 self.rcs = rcs
                 trial = 0
                 if not self.check_search_page():
                     while trial < 3:
-                        print(f"trial at scrap_list: {trial}")
+                        print(f"trial at scraper.scrap_list: {trial}, rcs: {rcs}, N: {N}")
+                        logger.info(f"trial at scraper.scrap_list: {trial}, rcs: {rcs}, N: {N}")
                         time.sleep(trial*6)
                         trial += 1
                         self.quit()
                         self.launch()
                         if self.check_search_page():
                             trial = 4
-                            print('managed to reconnect properly')
+                            print('info at scraper.scrap_list, managed to reconnect properly')
+                            logger.info('info at scraper.scrap_list, managed to reconnect properly')
                         else:
-                            print('not managed to reconnect properly, loop will be aborted')
+                            print('error at scraper.scrap_list, not managed to reconnect properly, loop will be aborted')
+                            logger.error('error at scraper.scrap_list, not managed to reconnect properly, loop will be aborted')
                 if self.check_search_page():
                     self.scrap_rcs()
                 else:
                     self.status = False
                     break
-                    print('break done')
-                if N>self.Nlimit:
-                    N=0
+                    print('info at scraper.scrap_list: break done')
+                    logger.info('info at scraper.scrap_list: break done')
+                if N > self.Nlimit:
+                    N = 0
                     self.save()
                     self.dict_page = []
-            if len(self.dict_page)>0:
-                print("last save")
+            if len(self.dict_page) > 0:
+                print('info at scraper.scrap_list: last save')
+                logger.info('info at scraper.scrap_list: last save')
                 self.save()
                 self.dict_page = []
 
@@ -391,8 +398,8 @@ class scraper():
             self.check_page("Journal des publications", "h1")
         else:
             self.status = False
-            print(f'error at check_search_page: {self.type} not accepted')
-            logger.debug(f'error at check_search_page: {self.type} not accepted')
+            print(f'error at scraper.check_search_page: {self.type} not accepted')
+            logger.error(f'error at scraper.check_search_page: {self.type} not accepted')
         return self.status
 
     def save(self):
@@ -401,8 +408,8 @@ class scraper():
             print(f'{len(self.dict_page)} companies updated')
             self.Mongo.drop_duplicates(colsel='task_index', coldup='RCS')
         else:
-            print(f'error at save: mongo not specified')
-            logger.debug(f'error at save: mongo not specified')
+            print(f'error at scraper.save: mongo not specified')
+            logger.error(f'error at scraper.save: mongo not specified')
             sys.exit()
 
 
