@@ -157,6 +157,7 @@ def main(Mongorcs, Mongorbe, Mongorcsp, Mongorbep, Mongopdf, Mongopubli, Mongofi
 
 
         collist = collist + ['RCS', 'correction', 'source', 'year']
+        collist = [x for x in collist if x in Bilan_list_DF.columns] #added to handle missing columns
         bilan_DF_new = Bilan_list_DF[collist].copy()
         bilan_DF_new['metadata'] = bilan_DF_new[collist].fillna("").to_dict(orient='records')
         bilan_DF_new['financials'] = bilan_DF_new['metadata'].apply(format_finan)
