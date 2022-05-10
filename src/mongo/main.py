@@ -22,8 +22,8 @@ class mongo():
         self.db = db
         self.col = col
         self.conn = pymongo.MongoClient(ip, port)
-        print('connected to DB:' + self.db)
-        print('connected to collection:' + self.col)
+        #print('connected to DB:' + self.db)
+        #print('connected to collection:' + self.col)
         self.collection = self.conn[db][col]
 
     def find(self, dictin=None, dictout=None): #take as input: dictin: input mongo query, dictout: output columns
