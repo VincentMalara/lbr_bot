@@ -1,6 +1,9 @@
 import pika
 from configs.settings import *
+from src.utils.set_logger import main as set_logger
 
+
+logger = set_logger()
 
 class Rabbit():
     def __init__(self):
@@ -10,12 +13,22 @@ class Rabbit():
         self.connection = pika.BlockingConnection(self.parameters)
         self.channel = self.connection.channel()
 
-    def send_message(self, message):
-        self.channel.queue_declare(queue='lbr_bot', durable=True)
+    def send_message(self, message, rcs_list=None):
+        try:
+            '''
+            self.channel.queue_declare(queue='lbr_bot', durable=True)
+            self.channel.basic_publish(exchange='',
+                              routing_key='lbr_bot',
+                              body=message)
+            '''
+            if rcs_list is not None:
+                logger.info(f"info at rabbit.send {rcs_list} sent")
+        except Exception as e:
+            print(f"error at rabbit.send message: {e}")
+            logger.error(f"error at rabbit.send message: {e}")
+            if rcs_list is not None:
+                logger.error(f"error at rabbit.send rcs list: {rcs_list}")
 
-        self.channel.basic_publish(exchange='',
-                          routing_key='lbr_bot',
-                          body=message)
         #print(f"message sent: {message}")
 
     def close(self):
