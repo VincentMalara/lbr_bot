@@ -13,6 +13,7 @@ numpy==1.22.1
 openpyxl==3.0.9
 outcome==1.1.0
 pandas==1.4.0
+pika==1.2.1
 pycparser==2.21
 pymongo==4.0.1
 pyOpenSSL==22.0.0
