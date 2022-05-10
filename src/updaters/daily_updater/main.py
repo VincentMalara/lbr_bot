@@ -89,7 +89,9 @@ def main():
     print(f"---- Pdfs parsed in {str(timer_main.stop())}s")
     '''
 
+    rcs_list = Mongorcs.get_RCSlist({'task_index':42})
 
+    print(len(rcs_list))
 
     print('---- Merging ----')
     RCS_output = merger(Mongorcs=Mongorcs, Mongorbe=Mongorbe, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep,

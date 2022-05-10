@@ -6,15 +6,15 @@ from src.rabbit.utils import Rabbit
 def main(message,mongo_rcs=None, date=None):
     format = False
     if isinstance(message, list):
-        print('list')
+        #print('list')
         #print(message)
         format = False
     elif isinstance(message, dict):
-        print('dict')
+        #print('dict')
         #message = [message]
         format = False
     elif isinstance(message, pd.DataFrame):
-        print('dataframe')
+        #print('dataframe')
         df = message.copy()
         message = message.fillna('').to_json(orient="records") #to_dict('records')
         format = True
