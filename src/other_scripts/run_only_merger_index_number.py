@@ -42,7 +42,6 @@ def main():
     print(f"---- Merging done at {str(timer_main.stop())}s ----")
     logger.info(f"---- Merging done at {str(timer_main.stop())}s ----")
 
-
     # tobedel
     # RCS_output.to_csv(f'backup_{datetime.today().strftime("%d%m%Y")}.csv', sep=';')
 

@@ -179,6 +179,7 @@ def main(Mongorcs, Mongorbe, Mongorcsp, Mongorbep, Mongopdf, Mongopubli, Mongofi
         del bilan_DF_new
 
         for label in list_personne:
+            RCS_output[label] = RCS_output[label].fillna('')
             RCS_output = calc_if_exist(RCS_output, RCS_output, label, label, function=cleanjusqua)
 
         #RCS_output['Gérant/Administrateur'] = RCS_output['Gérant/Administrateur'].fillna('').apply(cleanjusqua)
