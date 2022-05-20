@@ -61,7 +61,7 @@ def main():
     try:
         RCS_splited_lists = rcs_spliter(rcs_list, 1)
         for i, sub_rcs_list in enumerate(RCS_splited_lists):
-            #print(f"    {i} on {len(RCS_splited_lists)}")
+            print(f"    {i} on {len(RCS_splited_lists)}")
             message(RCS_output[RCS_output['RCS'].isin(sub_rcs_list)], mongo_rcs=Mongorcs, date=TODAY)
         print(f"---- Messaging done at {str(timer_main.stop())}s ----")
         logger.info(f"---- Messaging done at {str(timer_main.stop())}s ----")
