@@ -1,5 +1,4 @@
 from src.merger.utils import *
-
 from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 
@@ -92,13 +91,30 @@ def countHPS(row):
     y = False
     for name in [ "Gérant/Administrateur", "Délégué à la gestion journalière", "Actionnaire/Associé",
             "Personne(s) chargée(s) du contrôle des comptes", "Société de gestion", 'rbe']:
-        if row[name+ '_isHPS'] > 0:
+        if row[name+ '_isHPS'] > 0.5:
             y = True
             break
     return y
 
 
 publi['isHPS'] = publi.apply(countHPS, axis=1)
-
 publi = publi[publi['isHPS']].reset_index(drop=True)
-publi.to_excel('HillePaulSchut_RCS.xlsx')
+
+Mongorcs = mongo(ip='146.59.152.231', db='LBR_test', col='RCS_parsed')
+RCS_output = Mongorcs.find(dictin={'RCS': {'$in': publi['RCS'].to_list()}},
+                           dictout={'RCS': 1, "Dénomination(s) ou raison(s) sociale(s)":1, 'company name': 1, '_id':0})
+
+RCS_output['name'] = RCS_output['company name'].apply(get_name)
+RCS_output['Denomination'] = RCS_output["Dénomination(s) ou raison(s) sociale(s)"]
+
+RCS_output = RCS_output.merge(publi, on='RCS', how='left')
+
+RCS_output = RCS_output[['RCS', 'name',	'Denomination',	'Gérant/Administrateur_isHPS', 'Délégué à la gestion journalière_isHPS',
+            'Actionnaire/Associé_isHPS', 'Personne(s) chargée(s) du contrôle des comptes_isHPS', 'rbe_isHPS']]
+
+for label in RCS_output.columns:
+    if '_isHPS' in label:
+        RCS_output.rename(columns={label + 'isHPS': label}, inplace=True)
+
+
+RCS_output.to_excel('HillePaulSchut_RCS.xlsx')

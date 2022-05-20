@@ -29,7 +29,7 @@ def main():
     DBstatus = mongo(db='LBR_test', col='DB_status')
 
 
-    rcs_list = Mongorcs.get_RCSlist({'task_index':51})
+    rcs_list = Mongorcs.get_RCSlist({'task_index':52})
 
     print(len(rcs_list))
 
