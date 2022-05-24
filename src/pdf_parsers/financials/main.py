@@ -26,6 +26,7 @@ def main(RCS=None, mongo='', mongoparsed='', onlynew=True):
 
     if RCSDF.shape[0] > 0:
         RCSparsed = RCSDF.apply(lambda x: parser(x, task_index), axis=1).to_list()
+        #print(RCSparsed)
         mongoparsed.insert(RCSparsed)
         mongoparsed.drop_duplicates(colsel='task_index', coldup='N_depot')
         N = len(RCSparsed)

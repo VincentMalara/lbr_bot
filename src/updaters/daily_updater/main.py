@@ -1,19 +1,11 @@
 from datetime import datetime
 import sys
 
-from src.scrapers.resa.main import main as resa
-from src.scrapers.main import main as scraper
-from src.html_parsers.main import main as rcs_parser
-from src.pdf_downloaders.main import main as pdf_downloader
-from src.pdf_parsers.financials.main import main as financials_parser
-from src.pdf_parsers.publications.main import main as publi_parser
-from src.merger.main import main as merger
-from src.rabbit.main import main as message
-from src.generate_report.main import main as generate_report
-from src.utils.RCS_spliter import main as rcs_spliter
+
 from src.utils.timer import performance_timer
 from src.mongo.main import mongo
 from src.utils.set_logger import main as set_logger
+from src.updaters.daily_updater.utils import run_step, Mongos
 
 
 logger = set_logger()
@@ -24,197 +16,73 @@ TODAY = datetime.today().strftime("%d/%m/%Y")
 def main():
     timer_main = performance_timer()
 
-    Mongorcs = mongo(db='LBR_test', col='RCS')
-    Mongorbe = mongo(db='LBR_test', col='RBE')
-    Mongorcsp = mongo(db='LBR_test', col='RCS_parsed')
-    Mongorbep = mongo(db='LBR_test', col='RBE_parsed')
-    Mongoresa = mongo(db='LBR_test', col='RESA')
-    Mongoresaparsed = mongo(db='LBR_test', col='RESA_parsed')
-    Mongopdf = mongo(db='LBR_test', col='all_pdfs')
-    Mongopubli = mongo(db='LBR_test', col='publications')
-    Mongofinan = mongo(db='LBR_test', col='financials')
-    DBstatus = mongo( db='LBR_test', col='DB_status')
-
-    '''
-    rcs_list = ['A39456', 'B100006', 'B100007', 'B100008', 'B100009', 'B106338', 'B120246', 'B1202461', 'B120247', 'B120248',
-           'B14674', 'B14710', 'B14815', 'B15268', 'B15425', 'B15467', 'B15489', 'B15490', 'B15491', 'B15492', 'B15590',
-           'B15846', 'B15904', 'B16286', 'B16336', 'B16468', 'B16607', 'B16677', 'B16768', 'B16844', 'B16854', 'B16855',
-           'B16923', 'B16924', 'B17015', 'B17016', 'B17020', 'B17218', 'B17286', 'B17298', 'B17479', 'B182934', 'B215643',
-           'B221018', 'B221019', 'B248373', 'B249879', 'B255380', 'B262114', 'B39099', 'B56047', 'E1879', 'E2226', 'E229',
-           'E2818', 'E4589', 'E4738', 'E5555', 'E7052', 'E7905', 'E831','B256373']
-    
-    rcs_list = [ 'B17298', 'B17479', 'B182934']
-
-    '''
-    print("---- Updating from Resa ----")
-    logger.info("---- Updating from Resa ----")
-    try:
-        resa(Mongoresa=Mongoresa, Mongoresaparsed=Mongoresaparsed, Mongorcs=Mongorcs, nmonth=4)
-        print(f"---- Updated from Resa at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Updated from Resa at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.resa: {e}')
-        logger.error(f'error at main.resa: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
+    mongos = Mongos()
+    mongos.Mongorcs = mongo(db='LBR_test', col='RCS')
+    mongos.Mongorbe = mongo(db='LBR_test', col='RBE')
+    mongos.Mongorcsp = mongo(db='LBR_test', col='RCS_parsed')
+    mongos.Mongorbep = mongo(db='LBR_test', col='RBE_parsed')
+    mongos.Mongoresa = mongo(db='LBR_test', col='RESA')
+    mongos.Mongoresaparsed = mongo(db='LBR_test', col='RESA_parsed')
+    mongos.Mongopdf = mongo(db='LBR_test', col='all_pdfs')
+    mongos.Mongopubli = mongo(db='LBR_test', col='publications')
+    mongos.Mongofinan = mongo(db='LBR_test', col='financials')
+    mongos.DBstatus = mongo( db='LBR_test', col='DB_status')
 
 
+    step_dict = {
+        'resa': {'funct': "resa(Mongoresa=mongos.Mongoresa, Mongoresaparsed=mongos.Mongoresaparsed, Mongorcs=mongos.Mongorcs, nmonth=4)",
+                 'n': 0},
+        'rcs': {'funct': "scraper(rcs=rcs_list, type_='RCS', mongo=mongos.Mongorcs, to_be_updated=False)", 'n': 0},
+        'rbe': {'funct': "scraper(rcs=rcs_list, type_='RBE', mongo=mongos.Mongorbe, to_be_updated=False)",'n': 0},
+        'rcs_parsed': {'funct': "rcs_parser(rcs=rcs_list, type_='rcs', mongo=mongos.Mongorcs, mongoparsed=mongos.Mongorcsp, onlynew=False)",
+                       'n': 0},
+        'rbe_parsed': {'funct': "rcs_parser(rcs=rcs_list, type_='rbe', mongo=mongos.Mongorbe, mongoparsed=mongos.Mongorbep, onlynew=False)",
+                       'n': 0},
+        'pdf_downloader': {'funct': "pdf_downloader(RCS=rcs_list, mongo_rcsparsed=mongos.Mongorcsp, mongo_pdfs=mongos.Mongopdf)",
+                           'n': 1000},
+        'publi_parser': {'funct': "publi_parser(RCS=rcs_list, mongo=mongos.Mongopdf, mongoparsed=mongos.Mongopubli, onlynew=True)",
+                         'n': 1000},
+        'financials_parser': {'funct': "financials_parser(RCS=rcs_list, mongo=mongos.Mongopdf, mongoparsed=mongos.Mongofinan, onlynew=True)",
+                              'n': 1000},
+        'merger': {'funct': "merger(Mongorcs=mongos.Mongorcs, Mongorbe=mongos.Mongorbe, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongopdf=mongos.Mongopdf, Mongopubli=mongos.Mongopubli, Mongofinan=mongos.Mongofinan, rcs_list=rcs_list)",
+                   'n': 0},
+        'message': {'funct': "message(message=output, mongo_rcs=mongos.Mongorcs, date=TODAY)",
+                    'n': 0},
+        #'generate_report': {'funct': "generate_report(DBstatus=mongos.DBstatus, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongofinan=mongos.Mongofinan,Mongopubli=mongos.Mongopubli, Merged=output)",
+         #                   'n': 0}
+    }
 
-    #to be del
-    #Mongorcs.set_to_be_updated(RCS=rcs_list)
+    output = ''
+    #running first resa
+    rcs_list = []
+    funct = step_dict['resa']['funct']
+    nsplit = step_dict['resa']['n']
+    status, output = run_step(mongos, 'resa', funct, timer_main, output, rcs_list, nsplit, TODAY)
+    rcs_list = mongos.Mongorcs.get_RCSlist({'status': 'to_be_updated'})
+    print(rcs_list)
+    #rcs_list = ["B157402"]#"B180661", "B2642"]
+    #then loop over the other
+    if len(rcs_list) > 0:
+        for key in step_dict.keys():
+            if key != 'resa':
+                name = key
+                funct = step_dict[key]['funct']
+                nsplit = step_dict[key]['n']
+                n=0
+                status = False
+                while not status:
+                    n += 1
+                    status, output = run_step(mongos, name, funct, timer_main, output, rcs_list, nsplit, TODAY)
+                    if n > 1:
+                        mongos.Mongorcs.set_to_be_updated(RCS=rcs_list)
+                        print(f'bot has been stop at step {name}, rcs list has been reset to "to_be_updated"')
+                        logger.error(f'bot has been stop at step {name}, rcs list has been reset to "to_be_updated"')
+                        sys.exit()
+    else:
+        print('to be updated list is empty')
+        logger.info('to be updated list is empty')
 
-    print('---- Scraping RCS ----')
-    logger.info('---- Scraping RCS ----')
-    try:
-        rcs_list = scraper(type_='RCS', mongo=Mongorcs, to_be_updated=True)
-        print(f"---- RCS scraped at {str(timer_main.stop())}s ----")
-        logger.info(f"---- RCS scraped at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.scraper RCS: {e}')
-        logger.error(f'error at main.scraper RCS: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-
-    print('---- Scraping RBE ----')
-    logger.info('---- Scraping RBE ----')
-    try:
-        scraper(type_='RBE', rcs=rcs_list, mongo=Mongorbe, to_be_updated=False)
-        print(f"---- RBE scraped at {str(timer_main.stop())}s ----")
-        logger.info(f"---- RBE scraped at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.scraper RBE: {e}')
-        logger.error(f'error at main.scraper RBE: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-    print('---- Parsing RCS ----')
-    logger.info('---- Parsing RCS ----')
-    try:
-        rcs_parser(rcs=rcs_list, type_='rcs', mongo=Mongorcs, mongoparsed=Mongorcsp, onlynew=False)
-        print(f"---- RCS Parsed at {str(timer_main.stop())}s ----")
-        logger.info(f"---- RCS Parsed at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.parser RCS: {e}')
-        logger.error(f'error at main.parser RCS: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-    print('---- Parsing RBE ----')
-    logger.info('---- Parsing RBE ----')
-    try:
-        rcs_parser(rcs=rcs_list, type_='rbe', mongo=Mongorbe, mongoparsed=Mongorbep, onlynew=False)
-        print(f"---- RBE Parsed at {str(timer_main.stop())}s ----")
-        logger.info(f"---- RBE Parsed at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.parser RBE: {e}')
-        logger.error(f'error at main.parser RBE: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-    RCS_splited_lists = rcs_spliter(rcs_list, 1000)
-    print('---- Downloading pdfs ----')
-    logger.info('---- Downloading pdfs ----')
-    try:
-        for i, sub_rcs_list in enumerate(RCS_splited_lists):
-            print(f"    {i} on {len(RCS_splited_lists)}")
-            logger.info(f"    {i} on {len(RCS_splited_lists)}")
-            pdf_downloader(RCS=sub_rcs_list, mongo_rcsparsed=Mongorcsp, mongo_pdfs=Mongopdf)
-            print(f"    Pdfs Downloaded")
-            logger.info(f"    Pdfs Downloaded")
-        print(f"---- Pdfs Downloaded at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Pdfs Downloaded at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.pdf_downloader: {e}')
-        logger.error(f'error at main.pdf_downloader: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-
-    print('---- Parsing publi & financials---')
-    logger.info('---- Parsing publi & financials---')
-    try:
-        for i, sub_rcs_list in enumerate(RCS_splited_lists):
-            print(f"{i} on {len(RCS_splited_lists)}")
-            logger.info(f"{i} on {len(RCS_splited_lists)}")
-            print('    Starting publi')
-            logger.info('    Starting publi')
-            N = publi_parser(RCS=sub_rcs_list, mongo=Mongopdf, mongoparsed=Mongopubli, onlynew=True)
-            print(f'    Publi parsed : {N}')
-            logger.info(f'    Publi parsed : {N}')
-            print('    Starting financials')
-            logger.info('    Starting financials')
-            N = financials_parser(RCS=sub_rcs_list, mongo=Mongopdf, mongoparsed=Mongofinan, onlynew=True)
-            print(f"    Financials parsed : {N} in {str(timer_main.stop())}s")
-            logger.info(f"    Financials parsed : {N} in {str(timer_main.stop())}s")
-        print(f"---- Pdfs parsed in {str(timer_main.stop())}s")
-        logger.info(f"---- Pdfs parsed in {str(timer_main.stop())}s")
-    except Exception as e:
-        print(f'error at main.parsers: {e}')
-        logger.error(f'error at main.parsers: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-
-
-    #rcs_list = Mongorcs.get_RCSlist({'task_index':42})
-
-    #print(len(rcs_list))
-
-    print('---- Merging ----')
-    logger.info('---- Merging ----')
-    try:
-        RCS_output = merger(Mongorcs=Mongorcs, Mongorbe=Mongorbe, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep,
-                            Mongopdf=Mongopdf, Mongopubli=Mongopubli, Mongofinan=Mongofinan, rcs_list=rcs_list)
-        print(f"---- Merging done at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Merging done at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.merger: {e}')
-        logger.error(f'error at main.merger: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-    #tobedel
-    #RCS_output.to_csv(f'backup_{datetime.today().strftime("%d%m%Y")}.csv', sep=';')
-
-    print('---- Messaging ----')
-    logger.info('---- Messaging ----')
-    try:
-        RCS_splited_lists = rcs_spliter(rcs_list, 1)
-        for i, sub_rcs_list in enumerate(RCS_splited_lists):
-            #print(f"    {i} on {len(RCS_splited_lists)}")
-            message(RCS_output[RCS_output['RCS'].isin(sub_rcs_list)], mongo_rcs=Mongorcs, date=TODAY)
-        print(f"---- Messaging done at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Messaging done at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.message: {e}')
-        logger.error(f'error at main.message: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-
-    print('---- Dashboard data update ----')
-    logger.info('---- Dashboard data update ----')
-    try:
-        generate_report(DBstatus=DBstatus, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep, Mongofinan=Mongofinan,Mongopubli=Mongopubli, Merged=RCS_output)
-        print(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.generate_report: {e}')
-        logger.error(f'error at main.generate_report: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
-
-    Mongorcs.close()
-    Mongorbe.close()
-    Mongorcsp.close()
-    Mongorbep.close()
-    Mongoresa.close()
-    Mongoresaparsed.close()
-    Mongopdf.close()
-    Mongopubli.close()
-    Mongofinan.close()
-    DBstatus.close()
+    mongos.close_all()
 
     print(f"---- Completed in {str(timer_main.stop())}s ----")
     logger.info(f"---- Completed in {str(timer_main.stop())}s ----")
