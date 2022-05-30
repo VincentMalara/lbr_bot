@@ -36,7 +36,7 @@ def main():
     DBstatus = mongo( db='LBR_test', col='DB_status')
 
     daylist = ['15/05/2022','22/05/2022']
-    rcs_list=Mongorcs.get_RCSlist({'task_index':76, 'status': "to_be_updated"})
+    rcs_list=Mongorcs.get_RCSlist({ 'status': "to_be_updated"})
 
     print(len(rcs_list))
 
