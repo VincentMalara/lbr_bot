@@ -77,7 +77,9 @@ def main(Mongorcs, Mongorbe, Mongorcsp, Mongorbep, Mongopdf, Mongopubli, Mongofi
         RBE_output = pd.DataFrame()
         RBE_output['RCS'] = RBE_list_DF['RCS']
         RBE_output['Loi_2004'] = RBE_list_DF['Loi_2004']
-        RBE_output['UBO'] = RBE_list_DF['Benef Economiques'].apply(get_ubo)
+        #RBE_output['UBO'] = RBE_list_DF['Benef Economiques'].apply(get_ubo)
+        RBE_output = calc_if_exist(RBE_list_DF, RBE_output, 'Benef Economiques', 'UBO', function=get_ubo)
+
         RBE_output['not registrated BO'] = RBE_list_DF['status'].apply(is_not_reg)
         #RBE_output['UBO'] = RBE_output['UBO'].apply(cleanubo)
 

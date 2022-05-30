@@ -57,7 +57,7 @@ def run_step(mongos, name, funct, timer, output, rcs_list, n, TODAY):
         status = True
     except Exception as e:
         print(f'error at main.{name}: {e}')
-        logger.error(f'error at main.{name}: {e}')
+        logger.exception(f'error at main.{name}: {e}')
         logger.info('bot has been stopped')
         status = False
 

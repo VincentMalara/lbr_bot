@@ -38,6 +38,9 @@ def main():
     daylist = ['17/05/2022','18/05/2022','19/05/2022']
     rcs_list=Mongorcs.get_RCSlist({'extraction_date': {'$in':daylist}})
 
+    rcs_list = ['E2692', 'E7371', 'B267863', 'B267862', 'F13667' ]
+
+
     print('---- Merging ----')
     logger.info('---- Merging ----')
     #try:
@@ -58,31 +61,21 @@ def main():
 
     print('---- Messaging ----')
     logger.info('---- Messaging ----')
-    try:
-        RCS_splited_lists = rcs_spliter(rcs_list, 1)
-        for i, sub_rcs_list in enumerate(RCS_splited_lists):
-            print(f"    {i} on {len(RCS_splited_lists)}")
-            message(RCS_output[RCS_output['RCS'].isin(sub_rcs_list)], mongo_rcs=Mongorcs, date=TODAY)
-        print(f"---- Messaging done at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Messaging done at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.message: {e}')
-        logger.error(f'error at main.message: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
+    RCS_splited_lists = rcs_spliter(rcs_list, 1)
+    for i, sub_rcs_list in enumerate(RCS_splited_lists):
+        print(f"    {i} on {len(RCS_splited_lists)}")
+        message(RCS_output[RCS_output['RCS'].isin(sub_rcs_list)], mongo_rcs=Mongorcs, date=TODAY)
+    print(f"---- Messaging done at {str(timer_main.stop())}s ----")
+    logger.info(f"---- Messaging done at {str(timer_main.stop())}s ----")
+
 
 
     print('---- Dashboard data update ----')
     logger.info('---- Dashboard data update ----')
-    try:
-        generate_report(DBstatus=DBstatus, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep, Mongofinan=Mongofinan,Mongopubli=Mongopubli, Merged=RCS_output)
-        print(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
-        logger.info(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
-    except Exception as e:
-        print(f'error at main.generate_report: {e}')
-        logger.error(f'error at main.generate_report: {e}')
-        logger.info('bot has been stopped')
-        sys.exit()
+    generate_report(DBstatus=DBstatus, Mongorcsp=Mongorcsp, Mongorbep=Mongorbep, Mongofinan=Mongofinan,Mongopubli=Mongopubli, Merged=RCS_output)
+    print(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
+    logger.info(f"---- Dashboard data updated at {str(timer_main.stop())}s ----")
+
 
     Mongorcs.close()
     Mongorbe.close()
