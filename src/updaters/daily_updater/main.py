@@ -48,8 +48,8 @@ def main():
                    'n': 0},
         'message': {'funct': "message(message=output, mongo_rcs=mongos.Mongorcs, date=TODAY)",
                     'n': 0},
-        #'generate_report': {'funct': "generate_report(DBstatus=mongos.DBstatus, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongofinan=mongos.Mongofinan,Mongopubli=mongos.Mongopubli, Merged=output)",
-         #                   'n': 0}
+        'generate_report': {'funct': "generate_report(DBstatus=mongos.DBstatus, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongofinan=mongos.Mongofinan,Mongopubli=mongos.Mongopubli, Merged=output)",
+                            'n': 0}
     }
 
     output = ''
@@ -73,11 +73,13 @@ def main():
                 while not status:
                     n += 1
                     status, output = run_step(mongos, name, funct, timer_main, output, rcs_list, nsplit, TODAY)
+                    if not status and name == 'message':
+                        print(output)
                     if n > 1:
                         mongos.Mongorcs.set_to_be_updated(RCS=rcs_list)
                         print(f'bot has been stop at step {name}, rcs list has been reset to "to_be_updated"')
                         logger.error(f'bot has been stop at step {name}, rcs list has been reset to "to_be_updated"')
-                        sys.exit()
+                        break
     else:
         print('to be updated list is empty')
         logger.info('to be updated list is empty')
