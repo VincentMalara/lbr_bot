@@ -32,8 +32,7 @@ def main():
     step_dict = {
         'merger': {'funct': "merger(Mongorcs=mongos.Mongorcs, Mongorbe=mongos.Mongorbe, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongopdf=mongos.Mongopdf, Mongopubli=mongos.Mongopubli, Mongofinan=mongos.Mongofinan, rcs_list=rcs_list)",
                    'n': 0},
-        'message': {'funct': "message(message=output, mongo_rcs=mongos.Mongorcs, date=TODAY)",
-                    'n': 0},
+
         'generate_report': {'funct': "generate_report(DBstatus=mongos.DBstatus, Mongorcsp=mongos.Mongorcsp, Mongorbep=mongos.Mongorbep, Mongofinan=mongos.Mongofinan,Mongopubli=mongos.Mongopubli, Merged=output)",
                             'n': 0}
     }

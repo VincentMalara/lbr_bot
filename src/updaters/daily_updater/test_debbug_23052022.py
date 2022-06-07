@@ -37,12 +37,10 @@ def main():
 
     daylist = ['15/05/2022','22/05/2022']
     #daylist = [str(x+15)+'/05/2022' for x in range(15)]
-    #rcs_list=Mongorcs.get_RCSlist({ 'status': "to_be_updated"})
     rcs_list = Mongorcs.get_RCSlist({'extraction_date': {'$in': daylist}})
 
+    #rcs_list=Mongorcs.get_RCSlist({ 'status': "to_be_updated"})
     print(len(rcs_list))
-
-
 
 
     print('---- Merging ----')

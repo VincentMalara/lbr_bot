@@ -10,12 +10,16 @@ from src.generate_report.utils import countlist
 def main(DBstatus, Mongorcsp, Mongorbep, Mongofinan, Mongopubli, Merged=None):
 
     if Merged is not None:
-        output = {}
-        output['collection'] = 'Merged'
-        output['date'] = datetime.today().strftime("%d/%m/%Y")
-        output['RCS number modified since last updated'] = Merged.shape[0]
-        DBstatus.insert(output)
-        del output, Merged
+        try:
+            output = {}
+            output['collection'] = 'Merged'
+            output['date'] = datetime.today().strftime("%d/%m/%Y")
+            output['RCS number modified since last updated'] = Merged.shape[0]
+            DBstatus.insert(output)
+            del output, Merged
+        except:
+            print('error at generate report Merged input usable')
+            pass
 
     #RCS parsed
     DF = Mongorcsp.find()
